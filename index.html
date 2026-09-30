@@ -48,7 +48,7 @@ main{max-width:900px;margin:0 auto;padding:6px; display:flex; flex-direction:col
 
 /* Log */
 .log-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.log-box { flex: 1; overflow-y: auto; font-size: 15px; border: 1px solid var(--line); border-radius: 4px; background: #0A0806; padding: 4px; font-family:monospace; }
+.log-box { flex: 1; overflow-y: auto; font-size: 15px; border: 1px solid var(--line); border-radius: 4px; background: #0A0806; padding: 4px; font-family:monospace; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 .log-item { margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed #241C15;}
 .log-item:last-child { border-bottom: none; }
 .log-item.bad { color: var(--bad); }
@@ -118,7 +118,16 @@ main{max-width:900px;margin:0 auto;padding:6px; display:flex; flex-direction:col
 @media(max-width: 600px) {
     .hud-grid { grid-template-columns: 1fr; }
     .hud-col-left { position: static; }
-    .hud-col-left-inner { position: static; height: 460px; }
+    .hud-col-left-inner { position: static; height: auto; min-height: 0; }
+    /* Log lives at the very bottom of the page on mobile (moved via JS),
+       kept short so it never traps page scroll. */
+    .log-container.mobile-bottom { flex: none; width: 100%; margin: 6px 0 0; }
+    .log-container.mobile-bottom #log-box {
+        max-height: 140px;
+        min-height: 0;
+        flex: none;
+        font-size: 13px;
+    }
 }
 </style>
 </head>
@@ -142,7 +151,7 @@ main{max-width:900px;margin:0 auto;padding:6px; display:flex; flex-direction:col
                             <div class="prog-bar-container" id="phase-turn-bar"></div>
                         </div>
                     </div>
-                    <div class="log-container">
+                    <div class="log-container" id="log-container">
                         <div class="stats-header" style="text-align:left; padding-left:4px; margin-bottom:0;">RECIPE LOG</div>
                         <div id="log-box" class="log-box"></div>
                     </div>
@@ -764,6 +773,30 @@ function endGame() {
     logMsg("Cooking complete. See final evaluation.", "good");
     updateUI();
 }
+
+// Mobile: move the recipe log to the very bottom of the page so the tall,
+// independently-scrolling log box can't trap page scroll mid-layout.
+// Desktop: keep it in the left HUD column.
+function relayoutLog() {
+    const logEl = document.getElementById('log-container');
+    const main = document.getElementById('main-container');
+    const home = document.querySelector('.hud-col-left-inner');
+    if (!logEl || !main || !home) return;
+    if (window.matchMedia('(max-width: 600px)').matches) {
+        if (logEl.parentElement !== main) {
+            main.appendChild(logEl);
+            logEl.classList.add('mobile-bottom');
+        }
+    } else {
+        if (logEl.parentElement !== home) {
+            home.appendChild(logEl);
+            logEl.classList.remove('mobile-bottom');
+        }
+    }
+}
+window.addEventListener('resize', relayoutLog);
+document.addEventListener('DOMContentLoaded', relayoutLog);
+relayoutLog();
 </script>
 </body>
 </html>
