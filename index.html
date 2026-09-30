@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dal Tadka</title>
+<style>
+:root{
+    --bg: #120E0A;
+    --panel: #1A140F;
+    --ink: #F0E6D2;
+    --line: #3A2C21;
+    --accent: #42A5F5;
+    --good: #4CAF50;
+    --bad: #F44336;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow-x:hidden}
+button{cursor:pointer;border:1px solid #4A3A2C;background:#241C15;color:var(--ink);border-radius:4px;padding:8px 10px; transition:0.2s; font:inherit; width:100%; font-family:monospace; font-size:15px; font-weight:bold; letter-spacing:0.5px;}
+button:hover:not(:disabled){background:#362A1F;}
+button.primary{background:var(--accent);color:#000;border-color:var(--accent);}
+button.primary:hover:not(:disabled){filter: brightness(1.2);}
+button.action-prim{background:#241C15; border:1px solid var(--accent); color:var(--accent);}
+button.action-prim:hover:not(:disabled){background:var(--accent); color:#000;}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none; border-color:#3A2C21; color:#777;} button:active{transform:scale(0.98)}
+
+/* Layout */
+main{max-width:900px;margin:0 auto;padding:6px; display:flex; flex-direction:column; gap:6px;}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px; box-shadow: 0 4px 10px rgba(0,0,0,0.6);}
+.hidden{display:none!important}
+.sub{color:#A89B8D;font-size:15px; margin-bottom:4px; display:block; font-family:monospace;}
+
+/* HUD Display */
+.hud-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 6px; margin-bottom: 0; }
+.hud-col-left { position: relative; }
+.hud-col-left-inner { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 6px; }
+.phase-box { background:#0A0806; border-radius:6px; border:1px solid var(--accent); display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding: 6px 10px; transition: border-color 0.5s ease;}
+.phase-title { color:var(--accent); font-family:monospace; font-size:15px; font-weight:bold; letter-spacing:0; margin-bottom:4px; transition: color 0.5s ease;}
+.prog-bar-container { display: flex; gap: 4px; justify-content: center; align-items: center; width: 80px;}
+.prog-dot { width: 100%; height: 8px; background: #241C15; border-radius: 4px; transition: 0.3s ease; border: 1px solid #3A2C21;}
+.prog-dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+/* Dynamic Stats Box (Live Evaluation) */
+.stats-box { background:#0A0806; padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-family:monospace; font-size:15px; display:flex; flex-direction:column; gap:2px; color:#A89B8D; height: 100%;}
+.stats-header { text-align:center; color:var(--accent); font-weight:bold; border-bottom:1px solid #241C15; padding-bottom:4px; margin-bottom:2px; font-size:15px;}
+.stat-row { display:flex; align-items:center; justify-content:space-around; background:#140F0A; padding:2px 4px; border-radius:4px; border:1px solid #241C15; margin-bottom: 4px;}
+.stat-val { font-size:15px; display:flex; gap:2px; align-items:center;}
+.eval-line { font-family:monospace; font-size:15px; margin-bottom:1px; border-bottom:1px dashed #241C15; padding-bottom:2px; display:flex; justify-content:space-between; color:#CCC;}
+
+/* Log */
+.log-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.log-box { flex: 1; overflow-y: auto; font-size: 15px; border: 1px solid var(--line); border-radius: 4px; background: #0A0806; padding: 4px; font-family:monospace; }
+.log-item { margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed #241C15;}
+.log-item:last-child { border-bottom: none; }
+.log-item.bad { color: var(--bad); }
+.log-item.good { color: var(--good); }
+.log-item.neutral { color: #85C1E9; }
+
+/* Central Workstation Graphics */
+.workstation { border-radius: 12px; padding: 30px 10px 14px; margin: 0; display:flex; justify-content:center; align-items:center; transition: all 0.5s ease; flex-direction: row; gap: 16px;}
+.workstation.basin { background: radial-gradient(ellipse at center, #0F1A24 0%, #0A0806 70%); border: 2px solid #1A2F40; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+.workstation.stove { background: radial-gradient(ellipse at center, #2A1508 0%, #0A0806 70%); border: 2px solid #3A1F0D; box-shadow: inset 0 0 30px rgba(0,0,0,0.9); }
+.workstation.stove-hot { background: radial-gradient(ellipse at center, #3A0C08 0%, #0A0806 70%); border: 2px solid #4A1510; box-shadow: inset 0 0 40px rgba(0,0,0,0.9); }
+
+/* Lateral Actions */
+.side-action { display: flex; align-items: center; justify-content: center; width: 110px; }
+.side-btn { width: 100%; min-height: 84px; font-size: 15px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 4px; border: 1px dashed var(--accent); background: #1A140F; color: var(--accent); font-family: monospace; font-weight: bold; text-align: center; line-height: 1.3;}
+.side-btn:hover { background: var(--accent); color: #000; border-style: solid; }
+
+/* Cooking Tracks */
+.track-grid { display: flex; flex-wrap: wrap; gap: 30px 30px; justify-content: center; align-items: flex-start;}
+.track-col { display: flex; flex-direction: column; align-items: center; width: 80px;}
+.track-node { width: 72px; height: 72px; border-radius: 50%; background: #0A0806; border: 2px solid var(--line); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 5; box-shadow: inset 0 0 10px rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,0.8);}
+.track-node .t-icon { font-size: 24px; line-height: 1; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
+.track-node .t-label { font-size: 12px; font-weight: bold; position: absolute; top: -26px; font-family: monospace; color:#999; letter-spacing:0.5px; line-height:1.2; text-transform:uppercase; text-align:center; width:120px; white-space:normal; text-shadow:0 1px 2px #000;}
+.track-node .t-progress { font-size: 15px; font-weight: bold; background: #000; padding: 1px 6px; border-radius: 12px; border: 1px solid #666; position: absolute; bottom: -10px; color: #fff; font-family: monospace; white-space:nowrap;}
+
+.track-heat { border-color: #B71C1C; background: radial-gradient(circle at 30% 30%, #5C1010, #0A0806); }
+.track-heat .t-progress { border-color: #F44336; color: #F44336; }
+.track-heat .t-label { color: #F44336; }
+.track-water { border-color: #0D47A1; background: radial-gradient(circle at 30% 30%, #0A2458, #0A0806); }
+.track-water .t-progress { border-color: #42A5F5; color: #42A5F5; }
+.track-flavor { border-color: #1B5E20; background: radial-gradient(circle at 30% 30%, #0F3612, #0A0806); }
+.track-flavor .t-progress { border-color: #4CAF50; color: #4CAF50; }
+.track-richness { border-color: #F57F17; background: radial-gradient(circle at 30% 30%, #82430A, #0A0806); }
+.track-richness .t-progress { border-color: #FBC02D; color: #FBC02D; }
+.track-cooked { border-color: #6D4C41; background: radial-gradient(circle at 30% 30%, #3E2723, #0A0806); }
+.track-cooked .t-progress { border-color: #D7CCC8; color: #D7CCC8; }
+
+/* Hazard Overlay */
+#hazard-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:50; display:flex; flex-direction:column; justify-content:center; align-items:center; border-radius:12px; backdrop-filter: blur(2px); padding:20px; text-align:center;}
+.hazard-title { color:var(--bad); font-family:monospace; font-size:18px; font-weight:bold; letter-spacing:2px; margin-bottom:8px; animation: flash 1s infinite;}
+@keyframes flash { 0%{opacity:1;} 50%{opacity:0.6;} 100%{opacity:1;} }
+.hazard-desc { color:#FFF; font-size:15px; margin-bottom:16px;}
+.hazard-btn-box { display:flex; gap:12px; width:100%; max-width:400px;}
+
+/* Command Deck */
+#command-deck { background: transparent; padding: 0; display:flex; justify-content:center; width: 100%;}
+.deck-inner { max-width: 900px; width: 100%; }
+
+/* Tools UI */
+.tool-grid { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%;}
+.tool-slot { background: #1A140F; border: 1px solid var(--line); border-radius: 6px; padding: 4px; display: flex; flex-direction: column; align-items: center; width: 110px; }
+.tool-btn-row { display: flex; gap: 2px; width: 100%; justify-content: center; flex-wrap: wrap;}
+.tool-btn { flex: 1; min-width: 30px; font-size: 15px; padding: 6px 0; background: #241C15; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; transition: 0.2s; display:flex; flex-direction:column; align-items:center;}
+.tool-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+.tool-btn.red { border-color: #1A3A5A; }
+.tool-btn.red:hover { background: #42A5F5; }
+.tool-btn.black { border-color: #4A1510; }
+.tool-btn.black:hover { background: #F44336; }
+.tool-btn span { font-size: 15px; font-weight: bold; font-family: monospace; margin-top: 1px;}
+
+.wash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; justify-items: center;}
+.wash-grid button { width: 100%; max-width: 280px; }
+
+/* Final Score Board */
+#final-score-board { text-align:center; padding: 10px; width: 100%;}
+
+@media(max-width: 600px) {
+    .hud-grid { grid-template-columns: 1fr; }
+    .hud-col-left { position: static; }
+    .hud-col-left-inner { position: static; height: 460px; }
+}
+</style>
+</head>
+<body>
+
+<main id="main-container">
+    <div id="setup-screen" class="panel">
+        <h2 style="margin-top:0; color:var(--accent); font-family:monospace; text-transform:uppercase;">Recipe Initialization</h2>
+        <span class="sub" style="font-size:15px; color:#CCC;">Prepare the perfect dal. Phase 1 is a risk/reward washing challenge. Phases 2 and 3 use your toolset: Blue tools manage Water / Ghee. Red tools manage Fire / Spice.</span>
+        <button class="primary" style="margin-top:12px; padding:14px; font-size:16px;" onclick="startGame()">START COOKING</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <div class="hud-grid">
+            <div class="hud-col-left">
+                <div class="hud-col-left-inner">
+                    <div class="phase-box">
+                        <h1 id="main-title" style="margin:0;font:700 16px Georgia,serif; color:var(--accent); letter-spacing:1px; text-transform:uppercase;">DAL TADKA</h1>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <div class="phase-title" id="phase-title">PHASE 1: WASHING</div>
+                            <div class="prog-bar-container" id="phase-turn-bar"></div>
+                        </div>
+                    </div>
+                    <div class="log-container">
+                        <div class="stats-header" style="text-align:left; padding-left:4px; margin-bottom:0;">RECIPE LOG</div>
+                        <div id="log-box" class="log-box"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-box" id="stats-box">
+                <!-- Dynamically populated real-time evaluation -->
+            </div>
+        </div>
+
+        <div class="panel" style="background:#140F0A; border-color:#2A1F16; position:relative; padding: 8px;">
+            <div id="workstation" class="workstation basin">
+                <div id="action-left" class="side-action"></div>
+                <div id="tracks-board" class="track-grid"></div>
+                <div id="action-right" class="side-action"></div>
+                <div id="final-score-board" class="hidden"></div>
+            </div>
+            
+            <div id="hazard-overlay" class="hidden">
+                <div class="hazard-title" id="haz-title">CRISIS!</div>
+                <div class="hazard-desc" id="haz-desc">Desc</div>
+                <div class="hazard-btn-box">
+                    <button class="primary" onclick="resolveHazard('react')">REACT<br><span style="font-size:15px; font-weight:normal;">Manage Heat<br>Spoil Negated</span></button>
+                    <button style="border-color:var(--bad); color:var(--bad);" onclick="resolveHazard('receive')">RECEIVE<br><span style="font-size:15px; font-weight:normal;">Accept Spoil penalty</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command Deck -->
+    <div id="command-deck" class="hidden">
+        <div class="deck-inner">
+            <div id="wash-actions" class="wash-grid hidden"></div>
+            <div id="tool-actions" class="tool-grid hidden"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+const SUITS = ['♠', '♥', '♣', '♦'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+let gameState = {
+    pantry: [], hand: [], lentils: [],
+    phase: 1, turn: 0,
+    pot: { heat: 2, water: 5, cooked: 0 },
+    tadka: { heat: 2, flavor: 0, richness: 0 },
+    stats: { body: 10, dilution: 2, waterMin: 4, waterMax: 5, cooksNeeded: 4, stonesInPot: 0, spilledDal: 0, efficiencyBonus: 0 },
+    spoils: [], hazardQueue: [], activeHazard: null
+};
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    } return array;
+}
+
+function getRankVal(rank) {
+    if (['A','2','3','4'].includes(rank)) return 1;
+    if (['5','6','7','8','9'].includes(rank)) return 2;
+    return 3;
+}
+
+function logMsg(msg, type = 'neutral') {
+    const log = document.getElementById('log-box');
+    const el = document.createElement('div');
+    el.className = `log-item ${type}`; el.innerHTML = `> ${msg}`;
+    log.prepend(el);
+}
+
+function startGame() {
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.remove('hidden');
+    document.getElementById('command-deck').classList.remove('hidden');
+    
+    gameState.pantry = [];
+    SUITS.forEach(suit => { RANKS.forEach(rank => gameState.pantry.push({ suit, rank })); });
+    shuffle(gameState.pantry);
+    
+    gameState.hand = [];
+    for(let i=0; i<6; i++) gameState.hand.push(gameState.pantry.pop());
+    
+    gameState.lentils = Array(10).fill('dal').concat(Array(5).fill('stone'));
+    shuffle(gameState.lentils);
+    
+    gameState.phase = 1; gameState.turn = 0;
+    gameState.pot = { heat: 2, water: 5, cooked: 0 };
+    gameState.tadka = { heat: 2, flavor: 0, richness: 0 };
+    gameState.stats.efficiencyBonus = 0;
+    updateDerivedStats();
+    gameState.spoils = []; gameState.hazardQueue = []; gameState.activeHazard = null;
+    
+    logMsg("Phase 1: Washing. Use the Basin actions below to flush out stones. Draw too much water and you might spill your dal!", "neutral");
+    updateUI();
+}
+
+function updateDerivedStats() {
+    let body = 10 - gameState.stats.spilledDal;
+    gameState.stats.body = body;
+    gameState.stats.dilution = body >= 8 ? 2 : (body >= 5 ? 1 : 0);
+    gameState.stats.cooksNeeded = Math.ceil(body / 3);
+    gameState.stats.waterMin = Math.ceil(body / 3);
+    gameState.stats.waterMax = gameState.stats.waterMin + 1;
+}
+
+function getCheekySentence(d, pens, state, baseFlaws) {
+    if (baseFlaws === 0) return "A legitimately flawless bowl of dal. Gordon Ramsay is crying tears of joy.";
+
+    let pList = [
+        { name: 'stones', val: pens.stones },
+        { name: 'raw', val: pens.raw },
+        { name: 'spoils', val: pens.spoils },
+        { name: 'flavor', val: pens.flavor },
+        { name: 'richness', val: pens.richness },
+        { name: 'water', val: pens.water }
+    ].sort((a, b) => b.val - a.val);
+
+    let t1 = pList[0].name;
+    let t2 = pList[1].val > 0 ? pList[1].name : null;
+
+    let trait1 = "";
+    if (t1 === 'stones') trait1 = "hidden gravel";
+    else if (t1 === 'raw') trait1 = "undercooked lentils";
+    else if (t1 === 'spoils') trait1 = "a burnt, chaotic aftertaste";
+    else if (t1 === 'flavor') trait1 = (state.flavor < 4 ? "depressingly bland seasoning" : "violently overpowering spice");
+    else if (t1 === 'richness') trait1 = (state.richness < 2 ? "a hollow lack of ghee" : "excessive, cloying grease");
+    else if (t1 === 'water') trait1 = (state.water < state.waterMin ? "the texture of wet cement" : "a watery, soup-like consistency");
+
+    let trait2 = "";
+    if (t2) {
+        if (t2 === 'stones') trait2 = "stray rocks";
+        else if (t2 === 'raw') trait2 = "crunchy bites";
+        else if (t2 === 'spoils') trait2 = "scorch marks";
+        else if (t2 === 'flavor') trait2 = (state.flavor < 4 ? "zero flavor" : "too much spice");
+        else if (t2 === 'richness') trait2 = (state.richness < 2 ? "no richness" : "too much fat");
+        else if (t2 === 'water') trait2 = (state.water < state.waterMin ? "dryness" : "wateriness");
+    }
+
+    if (pens.efficiency > 0 && baseFlaws > 0 && d <= 3) {
+        return `Your Dal had noticeable issues with ${trait1}, but you were saved by the fact that you got it done early.`;
+    }
+
+    if (baseFlaws <= 2) {
+        return `Your Dal was excellently prepared, though held back slightly by ${trait1}.`;
+    } else if (baseFlaws <= 5) {
+        if (t2) return `A decent effort, but the dish is dragged down by ${trait1} and compounded by ${trait2}.`;
+        return `An okay dish, but it suffers heavily from ${trait1}.`;
+    } else {
+        if (t1 === 'stones' && t2 === 'raw') return "Crunchy for all the wrong reasons: aggressively undercooked lentils mixed with actual gravel.";
+        if (t1 === 'water' && t2 === 'flavor') {
+            if (state.water > state.waterMax && state.flavor < 4) return "Congratulations, you made a flavorless, watery lentil tea.";
+            if (state.water < state.waterMin && state.flavor > 5) return "A dry, solid brick of dal violently over-seasoned with spice.";
+        }
+        if (t1 === 'water' && t2 === 'richness') {
+            if (state.water < state.waterMin && state.richness > 3) return "A dense paste of dry lentils swimming in an artery-clogging ghee swamp.";
+        }
+        if (t1 === 'spoils' && t2 === 'flavor') return "Tastes like burnt pan scrapings and pure panic. Did you over-spice it to hide the scorch marks?";
+        if (t1 === 'raw' && t2 === 'richness') return "Undercooked, stubborn dal completely smothered in unearned ghee. A textural nightmare.";
+
+        if (t2) return `A tragic culinary accident defined by ${trait1}, made even worse by ${trait2}.`;
+        return `The dish was completely ruined by ${trait1}.`;
+    }
+}
+
+function getEvalData() {
+    let s = gameState.stats;
+    let m = gameState.pot.water;
+    let f = gameState.tadka.flavor;
+    let r = gameState.tadka.richness;
+    let c = gameState.pot.cooked;
+    
+    let pens = { spoils: 0, stones: 0, water: 0, raw: 0, flavor: 0, richness: 0, efficiency: s.efficiencyBonus };
+    let state = { water: m, flavor: f, richness: r, waterMin: s.waterMin, waterMax: s.waterMax };
+    
+    let d = 0;
+    let logStr = "";
+
+    // 1. Spoils
+    gameState.spoils.forEach((sp, i) => {
+        let pen = Math.max(0, sp - s.dilution);
+        pens.spoils += pen;
+        d += pen;
+        logStr += `<div class="eval-line"><span style="color:var(--bad)">Spoil ${i+1} (${sp} - Buff ${s.dilution})</span> <span>+${pen} Flaws</span></div>`;
+    });
+
+    // 2. Grit
+    let stoneDisplay = gameState.phase > 1 ? s.stonesInPot : '?';
+    let stonePen = gameState.phase > 1 ? (s.stonesInPot * Math.max(0, 3 - s.dilution)) : 0;
+    pens.stones = stonePen;
+    d += stonePen;
+    logStr += `<div class="eval-line"><span>🪨 Grit (${stoneDisplay} stones)</span> <span style="${stonePen>0?'color:var(--bad)':'color:var(--good)'}">+${stonePen} Flaws</span></div>`;
+
+    // 3. Water Consistency
+    let wPen = 0;
+    if(m < s.waterMin) wPen = s.waterMin - m;
+    if(m > s.waterMax) wPen = m - s.waterMax;
+    pens.water = wPen;
+    d += wPen;
+    logStr += `<div class="eval-line"><span>💧 Consistency (Water ${m}, Ideal ${s.waterMin}-${s.waterMax})</span> <span style="${wPen>0?'color:var(--bad)':'color:var(--good)'}">+${wPen} Flaws</span></div>`;
+
+    // 4. Cooked Limit
+    let cPen = 0;
+    if(c < s.cooksNeeded) cPen = s.cooksNeeded - c;
+    if(cPen < 0) cPen = 0;
+    pens.raw = cPen;
+    d += cPen;
+    logStr += `<div class="eval-line"><span>🍲 Cooked (${c} / ${s.cooksNeeded})</span> <span style="${cPen>0?'color:var(--bad)':'color:var(--good)'}">+${cPen} Flaws</span></div>`;
+
+    // 5. Flavor 
+    let fPen = 0;
+    if(f < 4) fPen = 4 - f; if(f > 5) fPen = f - 5;
+    pens.flavor = fPen;
+    d += fPen;
+    logStr += `<div class="eval-line"><span>🌿 Flavor (Val ${f}, Ideal 4-5)</span> <span style="${fPen>0?'color:var(--bad)':'color:var(--good)'}">+${fPen} Flaws</span></div>`;
+
+    // 6. Richness
+    let rPen = 0;
+    if(r < 2) rPen = 2 - r; if(r > 3) rPen = r - 3;
+    pens.richness = rPen;
+    d += rPen;
+    logStr += `<div class="eval-line"><span>🧈 Richness (Val ${r}, Ideal 2-3)</span> <span style="${rPen>0?'color:var(--bad)':'color:var(--good)'}">+${rPen} Flaws</span></div>`;
+
+    // 7. Efficiency Bonus 
+    let baseFlaws = pens.spoils + pens.stones + pens.water + pens.raw + pens.flavor + pens.richness;
+    let effScore = Math.floor(s.efficiencyBonus / 2);
+    if (effScore > 0) {
+        d -= effScore;
+        logStr += `<div class="eval-line"><span>⏱ Efficiency (${s.efficiencyBonus} turns saved)</span> <span style="color:var(--good)">-${effScore} Flaws</span></div>`;
+    }
+
+    return { html: logStr, total: d, pens: pens, state: state, baseFlaws: baseFlaws };
+}
+
+function createTrackHTML(type, label, icon, val, target) {
+  let prog = (target === '' || target == null) ? `${val}` : `${val}/${target}`;
+  return `<div class="track-col"><div class="track-node track-${type}"><div class="t-label">${label}</div><div class="t-icon">${icon}</div><div class="t-progress">${prog}</div></div></div>`;
+}
+
+function updateUI() {
+    const washActions = document.getElementById('wash-actions');
+    const toolActions = document.getElementById('tool-actions');
+    const actionLeft = document.getElementById('action-left');
+    const actionRight = document.getElementById('action-right');
+
+    washActions.innerHTML = '';
+    toolActions.innerHTML = '';
+    actionLeft.innerHTML = '';
+    actionRight.innerHTML = '';
+
+    if (gameState.phase === 1) {
+        washActions.classList.remove('hidden');
+        toolActions.classList.add('hidden');
+    } else {
+        washActions.classList.add('hidden');
+        toolActions.classList.remove('hidden');
+    }
+
+    // Theme shifts
+    let themeColor = '#42A5F5'; 
+    let pTitle = "PHASE 1: WASHING";
+    let workstationClass = "basin";
+
+    if (gameState.phase === 2) { 
+        themeColor = '#FF9900'; 
+        pTitle = "PHASE 2: BOILING"; 
+        workstationClass = "stove";
+    } else if (gameState.phase >= 3) { 
+        themeColor = '#F44336'; 
+        pTitle = gameState.phase === 3 ? "PHASE 3: THE TADKA" : "EVALUATION"; 
+        workstationClass = "stove-hot";
+    }
+
+    document.documentElement.style.setProperty('--accent', themeColor);
+    document.getElementById('phase-title').innerText = pTitle;
+    document.getElementById('main-title').style.color = themeColor;
+    document.getElementById('workstation').className = `workstation ${workstationClass}`;
+
+    // Progress Bar
+    let progHtml = '';
+    for(let i=0; i<5; i++) {
+        progHtml += `<div class="prog-dot ${i < gameState.turn ? 'active' : ''}"></div>`;
+    }
+    document.getElementById('phase-turn-bar').innerHTML = progHtml;
+
+    // Dynamic Live Evaluation
+    let s = gameState.stats;
+    let bodyDots = '<span style="color:var(--good); font-size:15px;">' + '●'.repeat(s.body) + '</span><span style="color:var(--bad); font-size:15px;">' + '○'.repeat(10-s.body) + '</span>';
+    let shieldVis = '🛡'.repeat(s.dilution) + '<span style="opacity:0.2">🛡</span>'.repeat(2-s.dilution);
+    
+    let evalData = getEvalData();
+
+    document.getElementById('stats-box').innerHTML = `
+        <div class="stat-row">
+            <span><b>MASS</b> ${bodyDots} <span style="color:#FFF;">${s.body}</span></span>
+            <span><b>BUFF</b> ${shieldVis} <span style="color:#FFF;">-${s.dilution}</span></span>
+        </div>
+        <div class="stats-header">LIVE EVALUATION</div>
+        ${evalData.html}
+        <div class="eval-line" style="border:none; margin-top:0; font-weight:bold; color:var(--accent);"><span>TOTAL SCORE</span> <span>${evalData.total} Flaws</span></div>
+    `;
+
+    // Tracks
+    const board = document.getElementById('tracks-board');
+    if (gameState.phase <= 3) {
+        board.innerHTML = '';
+        if (gameState.phase === 1) {
+            board.innerHTML += createTrackHTML('cooked', 'BASIN', '🥣', gameState.lentils.length, '15');
+            board.innerHTML += createTrackHTML('richness', 'SPILLED DAL', '💧', gameState.stats.spilledDal, '');
+        } else if (gameState.phase === 2) {
+            board.innerHTML += createTrackHTML('heat', 'POT HEAT', '🔥', gameState.pot.heat, '');
+            board.innerHTML += createTrackHTML('water', `WATER [${s.waterMin}-${s.waterMax}]`, '💧', gameState.pot.water, '');
+            board.innerHTML += createTrackHTML('cooked', `COOKED [${s.cooksNeeded}+]`, '🍲', gameState.pot.cooked, s.cooksNeeded);
+        } else if (gameState.phase === 3) {
+            board.innerHTML += createTrackHTML('heat', 'PAN HEAT', '🔥', gameState.tadka.heat, '');
+            board.innerHTML += createTrackHTML('flavor', 'FLAVOR [4-5]', '🌿', gameState.tadka.flavor, '');
+            board.innerHTML += createTrackHTML('richness', 'RICHNESS [2-3]', '🧈', gameState.tadka.richness, '');
+        }
+    }
+
+    // Tools & Action Rendering
+    if (gameState.phase > 1 && !gameState.activeHazard) {
+        gameState.hand.forEach((card, idx) => {
+            let val = getRankVal(card.rank);
+            let isRed = ['♥', '♦'].includes(card.suit);
+            let html = `<div class="tool-slot"><div class="tool-btn-row">`;
+            
+            if (isRed) {
+                if (gameState.phase === 2) {
+                    html += `<button class="tool-btn red" onclick="commitAction(${idx}, 'water')">💧<span>+${val}</span></button>`;
+                } else if (gameState.phase === 3) {
+                    html += `<button class="tool-btn red" onclick="commitAction(${idx}, 'ghee')">🧈<span>+${val}</span></button>`;
+                }
+            } else {
+                html += `<button class="tool-btn black" onclick="commitAction(${idx}, 'fire_up')">🔥<span>+${val}</span></button>`;
+                html += `<button class="tool-btn black" onclick="commitAction(${idx}, 'fire_down')">🔥<span>-${val}</span></button>`;
+                if (gameState.phase === 3) {
+                    html += `<button class="tool-btn black" onclick="commitAction(${idx}, 'spice')">🌿<span>+${val}</span></button>`;
+                }
+            }
+            html += `</div></div>`;
+            toolActions.innerHTML += html;
+        });
+
+        // Center lateral actions
+        if (gameState.phase === 2) {
+            actionLeft.innerHTML = `<button class="side-btn" onclick="commitBoilStop()">✅<br>FINISH<br>EARLY</button>`;
+            actionRight.innerHTML = `<button class="side-btn" onclick="commitGlobalStir()">🥄<br>STIR<br>(Pass)</button>`;
+        } else if (gameState.phase === 3) {
+            actionRight.innerHTML = `<button class="side-btn" onclick="commitGlobalStir()">🥄<br>STIR<br>(Pass)</button>`;
+        }
+
+    } else if (gameState.phase === 1 && !gameState.activeHazard) {
+        let left = 5 - gameState.turn;
+        washActions.innerHTML = `
+            <div class="action-group-title" style="width:100%; text-align:center; color:var(--accent);">Basin (Turns: ${left} | Items: ${gameState.lentils.length})</div>
+            <button class="action-prim" style="border-color:#4CAF50; color:#4CAF50; padding:12px;" onclick="commitWash('gentle')">🌊 GENTLE (Draw 2) <br><span style="font-size:15px; color:#CCC;">Catches 2 Dal</span></button>
+            <button class="action-prim" style="border-color:#FBC02D; color:#FBC02D; padding:12px;" onclick="commitWash('standard')">🌊 STANDARD (Draw 3) <br><span style="font-size:15px; color:#CCC;">Catches 2 Dal</span></button>
+            <button class="action-prim" style="border-color:#F44336; color:#F44336; padding:12px;" onclick="commitWash('vigorous')">🌊 RECKLESS (Draw 5) <br><span style="font-size:15px; color:#CCC;">Catches 1 Dal</span></button>
+        `;
+        actionLeft.innerHTML = `<button class="side-btn" onclick="commitWash('stop')">✅<br>FINISH<br>EARLY</button>`;
+    }
+}
+
+function commitGlobalStir() {
+    logMsg(`Stirred the mixture. (Passed turn)`, 'neutral');
+    let activeHeatState = gameState.phase === 3 ? gameState.tadka : gameState.pot;
+    
+    if (gameState.phase === 2) {
+        if (gameState.pot.heat >= 3) gameState.pot.cooked++;
+        if (gameState.pot.heat >= 5) gameState.pot.water -= 2;
+        else if (gameState.pot.heat >= 3) gameState.pot.water -= 1;
+    } else if (gameState.phase === 3) {
+        gameState.tadka.heat -= 1;
+        if (gameState.tadka.heat < 0) gameState.tadka.heat = 0;
+    }
+
+    gameState.turn++;
+    checkContinuousHazards(); 
+}
+
+function commitWash(type) {
+    if (type === 'stop') {
+        let saved = 5 - gameState.turn;
+        gameState.stats.efficiencyBonus += saved;
+        logMsg(`Stopped washing early! Saved ${saved} turns.`, 'good');
+        gameState.turn = 5;
+        checkPhaseTransition();
+        return;
+    }
+
+    let draws = 0, strainer = 0;
+    if (type === 'gentle') { draws = 2; strainer = 2; }
+    else if (type === 'standard') { draws = 3; strainer = 2; }
+    else if (type === 'vigorous') { draws = 5; strainer = 1; }
+
+    let revealed = 0, dals = 0, stones = 0;
+    for(let i=0; i<draws; i++) {
+        if (gameState.lentils.length === 0) break;
+        let item = gameState.lentils.pop();
+        revealed++;
+        if(item === 'dal') dals++; else stones++;
+    }
+
+    let spilled = Math.max(0, dals - strainer);
+    gameState.stats.spilledDal += spilled;
+
+    let msg = `Washed (${type.toUpperCase()}): Drew ${revealed}. Flushed ${stones} 🪨. `;
+    if (spilled > 0) {
+        msg += `Spilled ${spilled} dal!`;
+        logMsg(msg, 'bad');
+    } else {
+        msg += `All dal saved.`;
+        logMsg(msg, stones > 0 ? 'good' : 'neutral');
+    }
+
+    updateDerivedStats();
+    gameState.turn++;
+
+    if (gameState.lentils.length === 0) {
+        let saved = 5 - gameState.turn;
+        if (saved > 0) {
+            gameState.stats.efficiencyBonus += saved;
+            logMsg(`Basin empty! Saved ${saved} turns.`, 'good');
+        } else {
+            logMsg(`Basin empty.`, 'neutral');
+        }
+        gameState.turn = 5; 
+        checkPhaseTransition();
+    } else if (gameState.turn >= 5) {
+        checkPhaseTransition();
+    } else {
+        updateUI();
+    }
+}
+
+function commitBoilStop() {
+    let saved = 5 - gameState.turn;
+    if (gameState.pot.cooked < gameState.stats.cooksNeeded) {
+        logMsg(`Stopped boiling early, but the dal is raw! No efficiency bonus granted.`, 'bad');
+    } else {
+        gameState.stats.efficiencyBonus += saved;
+        logMsg(`Stopped boiling early! Saved ${saved} turns.`, 'good');
+    }
+    gameState.turn = 5;
+    checkPhaseTransition();
+}
+
+function commitAction(idx, type) {
+    let card = gameState.hand[idx];
+    let val = getRankVal(card.rank);
+    let cardStr = `Tool[Val ${val}]`;
+
+    let activeHeatState = gameState.phase === 3 ? gameState.tadka : gameState.pot;
+
+    if (type === 'fire_up') { 
+        activeHeatState.heat += val; 
+        logMsg(`Played ${cardStr}. Fire up (Heat +${val}).`); 
+    }
+    else if (type === 'fire_down') { 
+        activeHeatState.heat -= val; 
+        logMsg(`Played ${cardStr}. Fire down (Heat -${val}).`); 
+    }
+    else if (type === 'water') { 
+        gameState.pot.water += val; 
+        gameState.pot.heat -= 1; 
+        logMsg(`Played ${cardStr}. Added water to pot (+${val}), dropped heat (-1).`); 
+    }
+    else if (type === 'ghee') {
+        gameState.tadka.richness += val; 
+        activeHeatState.heat -= 1; 
+        logMsg(`Played ${cardStr}. Bloomed ghee in pan (+${val} Richness, Heat -1).`); 
+    }
+    else if (type === 'spice') {
+        let h = activeHeatState.heat;
+        activeHeatState.heat -= 1;
+        if (h <= 3) { logMsg(`Played ${cardStr}. Pan too cold (Heat ${h}). Spice failed to bloom. Heat -1.`, 'neutral'); }
+        else if (h === 4) { gameState.tadka.flavor += val; logMsg(`Played ${cardStr}. Perfect bloom! (+${val} Flavor, Heat -1).`, 'good'); }
+        else if (h === 5) { 
+            gameState.tadka.flavor += val + 1; 
+            logMsg(`Played ${cardStr}. Spice scorched! (+${val+1} Flavor, Heat -1).`, 'bad'); 
+            queueHazard('SPICE SCORCH', 1, `Pan heat was 5! Spoil 1 added.`);
+        }
+        else if (h >= 6) { 
+            gameState.tadka.flavor += 1; 
+            logMsg(`Played ${cardStr}. Spice BURNED! (+1 Flavor, Heat -1).`, 'bad'); 
+            queueHazard('SPICE BURN', 2, `Pan heat was 6+! Spoil 2 added.`);
+        }
+    }
+
+    if (activeHeatState.heat < 0) activeHeatState.heat = 0;
+    
+    // Process End of Turn Rules
+    // Phase 2: boiling cooks / evaporates. Phase 3: pan retains heat —
+    // ghee/spice/stir already cost 1 heat each, so no extra auto-cool here
+    // (previously fire_up netted val-1, making val-1 cards useless).
+    if (gameState.phase === 2) {
+        if (gameState.pot.heat >= 3) gameState.pot.cooked++;
+        if (gameState.pot.heat >= 5) gameState.pot.water -= 2;
+        else if (gameState.pot.heat >= 3) gameState.pot.water -= 1;
+    }
+
+    gameState.hand.splice(idx, 1);
+    if (gameState.pantry.length > 0) gameState.hand.push(gameState.pantry.pop());
+    gameState.turn++;
+    
+    checkContinuousHazards(); 
+}
+
+function checkContinuousHazards() {
+    if (gameState.phase === 2) {
+        if (gameState.pot.water <= 0) {
+            queueHazard('BOILED DRY', 2, "Dal Pot water reached 0. Spoil 2.");
+        }
+        if (gameState.pot.heat >= 6) {
+            queueHazard('BOIL OVER', 1, "Dal Pot heat reached 6. Spoil 1.");
+        }
+    } else if (gameState.phase === 3) {
+        if (gameState.tadka.heat >= 6) {
+            queueHazard('PAN FIRE', 1, "Tadka Pan heat reached 6. Spoil 1.");
+        }
+    }
+    processNextHazard();
+}
+
+function queueHazard(title, strength, desc) {
+    if (!gameState.hazardQueue.find(h => h.title === title)) {
+        gameState.hazardQueue.push({title, strength, desc});
+    }
+}
+
+function processNextHazard() {
+    if (gameState.hazardQueue.length > 0) {
+        gameState.activeHazard = gameState.hazardQueue.shift();
+        document.getElementById('hazard-overlay').classList.remove('hidden');
+        document.getElementById('haz-title').innerText = gameState.activeHazard.title;
+        document.getElementById('haz-desc').innerText = gameState.activeHazard.desc;
+        updateUI(); 
+    } else {
+        checkPhaseTransition();
+    }
+}
+
+function resolveHazard(actionType) {
+    let haz = gameState.activeHazard;
+    let activeHeatState = gameState.phase === 3 ? gameState.tadka : gameState.pot;
+    gameState.activeHazard = null;
+    document.getElementById('hazard-overlay').classList.add('hidden');
+    
+    if (actionType === 'react') {
+        if (gameState.phase === 2) gameState.pot.water += 2;
+        activeHeatState.heat -= 2;
+        if (activeHeatState.heat < 0) activeHeatState.heat = 0;
+        logMsg(`REACTED: Managed heat! (-2 Heat). ${haz.title} averted.`, 'good');
+    } else {
+        gameState.spoils.push(haz.strength);
+        logMsg(`RECEIVED: Accepted ${haz.title}. Added Spoil ${haz.strength}.`, 'bad');
+        if (haz.title === 'BOILED DRY') gameState.pot.water = 1;
+        if (haz.title === 'BOIL OVER') gameState.pot.heat = 4;
+        if (haz.title === 'PAN FIRE') gameState.tadka.heat = 4;
+    }
+    checkContinuousHazards(); 
+}
+
+function checkPhaseTransition() {
+    if (gameState.turn >= 5) {
+        if (gameState.phase === 1) {
+            gameState.stats.stonesInPot = gameState.lentils.filter(x => x === 'stone').length;
+            updateDerivedStats();
+            logMsg(`Washing complete. ${gameState.stats.stonesInPot} stones left as grit. Body set to ${gameState.stats.body}.`, gameState.stats.stonesInPot > 0 ? 'bad' : 'good');
+            gameState.phase = 2; gameState.turn = 0;
+            logMsg("Phase 2: Boil. Manage Heat and Water to Cook dal.", "neutral");
+        }
+        else if (gameState.phase === 2) {
+            logMsg("Phase 2 complete. Transitioning to Tadka.", "neutral");
+            gameState.phase = 3; gameState.turn = 0;
+            logMsg("Phase 3: Tadka. Build Richness and Bloom Spice in a hot pan.", "neutral");
+        }
+        else if (gameState.phase === 3) {
+            endGame(); return;
+        }
+    }
+    updateUI();
+}
+
+function endGame() {
+    gameState.phase = 4;
+    document.getElementById('command-deck').classList.add('hidden');
+    document.getElementById('tracks-board').classList.add('hidden');
+    document.getElementById('action-left').classList.add('hidden');
+    document.getElementById('action-right').classList.add('hidden');
+    
+    const finalBoard = document.getElementById('final-score-board');
+    finalBoard.classList.remove('hidden');
+    
+    let evalData = getEvalData();
+    let d = evalData.total;
+    let cheekySentence = getCheekySentence(d, evalData.pens, evalData.state, evalData.baseFlaws);
+
+    let rating = "";
+    if(d <= 0) rating = `<span style="color:var(--good); font-size:20px; font-weight:bold;">${d} Flaws — Delicious! (Perfect)</span>`;
+    else if(d <= 3) rating = `<span style="color:var(--good); font-size:20px; font-weight:bold;">${d} Flaws — Excellent</span>`;
+    else if(d <= 6) rating = `<span style="color:var(--accent); font-size:20px; font-weight:bold;">${d} Flaws — Satisfactory</span>`;
+    else if(d <= 9) rating = `<span style="color:var(--bad); font-size:20px; font-weight:bold;">${d} Flaws — Needs practice</span>`;
+    else rating = `<span style="color:var(--bad); font-weight:bold; font-size:20px;">${d} Flaws — Kitchen disaster</span>`;
+
+    finalBoard.innerHTML = `
+        <h2 style="color:var(--accent); margin-top:0; font-family:monospace; font-size:20px; letter-spacing:2px;">TASTE TEST</h2>
+        <div style="background:#0A0806; padding:12px; border-radius:6px; border:1px solid #3A2C21; text-align:left; max-width:500px; margin:0 auto 20px;">
+            ${evalData.html}
+            <div class="eval-line" style="border:none; margin-top:8px; padding-top:8px; border-top:1px solid #3A2C21; font-weight:bold; color:var(--accent); font-size:16px;"><span>FINAL SCORE</span> <span>${d} Flaws</span></div>
+        </div>
+        <div style="padding:16px; background:#0A0806; border:2px solid var(--accent); border-radius:8px; display:inline-block; font-weight:bold; color:#FFF; font-size:15px; max-width:500px; line-height:1.4;">
+            "${cheekySentence}"
+        </div><br>
+        <button class="primary" style="margin-top:24px; padding:16px 24px; font-size:16px; max-width:300px;" onclick="location.reload()">COOK ANOTHER BATCH</button>
+    `;
+
+    logMsg("Cooking complete. See final evaluation.", "good");
+    updateUI();
+}
+</script>
+</body>
+</html>
