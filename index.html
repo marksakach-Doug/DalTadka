@@ -14,7 +14,7 @@
     --good: #4CAF50;
     --bad: #F44336;
 }
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow-x:hidden}
+*{box-sizing:border-box} html, body{overflow-x:hidden; overflow-x:clip} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif}
 button{cursor:pointer;border:1px solid #4A3A2C;background:#241C15;color:var(--ink);border-radius:4px;padding:8px 10px; transition:0.2s; font:inherit; width:100%; font-family:monospace; font-size:15px; font-weight:bold; letter-spacing:0.5px;}
 button:hover:not(:disabled){background:#362A1F;}
 button.primary{background:var(--accent);color:#000;border-color:var(--accent);}
@@ -119,6 +119,11 @@ main{max-width:900px;margin:0 auto;padding:6px; display:flex; flex-direction:col
     .hud-grid { grid-template-columns: 1fr; }
     .hud-col-left { position: static; }
     .hud-col-left-inner { position: static; height: auto; min-height: 0; }
+    /* Workstation stacks instead of squeezing: full-width side buttons,
+       tracks wrap below with no horizontal overflow. */
+    .workstation { flex-wrap: wrap; gap: 12px; }
+    .side-action { width: 100%; }
+    .side-btn { min-height: 0; padding: 10px 4px; }
     /* Log lives at the very bottom of the page on mobile (moved via JS),
        kept short so it never traps page scroll. */
     .log-container.mobile-bottom { flex: none; width: 100%; margin: 6px 0 0; }
