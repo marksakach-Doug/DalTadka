@@ -117,6 +117,9 @@ main{max-width:900px;margin:0 auto;padding:6px; display:flex; flex-direction:col
 #final-score-board { text-align:center; padding: 10px; width: 100%;}
 
 @media(max-width: 600px) {
+    /* Kill pull-to-refresh / overscroll wedging: Chrome iOS was yanking the
+       page to the top with the refresh spinner and locking scroll there. */
+    html, body { overscroll-behavior-y: none; }
     .hud-grid { grid-template-columns: 1fr; }
     .hud-col-left { position: static; }
     .hud-col-left-inner { position: static; height: auto; min-height: 0; }
@@ -127,14 +130,20 @@ main{max-width:900px;margin:0 auto;padding:6px; display:flex; flex-direction:col
     .panel { touch-action: pan-y; }
     .side-action { width: 100%; }
     .side-btn { min-height: 0; padding: 10px 4px; }
-    /* Log lives at the very bottom of the page on mobile (moved via JS),
-       kept short so it never traps page scroll. */
+    /* Log lives at the very bottom of the page on mobile (moved via JS).
+       Single-scroller rule: NO inner scroll box on mobile — the log is
+       plain static text (trimmed to the last 30 entries in logMsg) so the
+       viewport is the only thing that ever scrolls. */
     .log-container.mobile-bottom { flex: none; width: 100%; margin: 6px 0 0; }
     .log-container.mobile-bottom #log-box {
-        max-height: 140px;
+        max-height: none;
         min-height: 0;
         flex: none;
+        overflow-y: visible;
         font-size: 13px;
+        overscroll-behavior: auto;
+        -webkit-overflow-scrolling: auto;
+        touch-action: auto;
     }
 }
 </style>
@@ -229,6 +238,7 @@ function logMsg(msg, type = 'neutral') {
     const el = document.createElement('div');
     el.className = `log-item ${type}`; el.innerHTML = `> ${msg}`;
     log.prepend(el);
+    while (log.children.length > 30) log.removeChild(log.lastChild);
 }
 
 function startGame() {
