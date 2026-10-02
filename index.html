@@ -63,10 +63,22 @@ textarea{width:100%;font:12px ui-monospace,monospace;background:var(--trk);color
 @keyframes bu{0%{transform:scale(.2);opacity:0}40%{opacity:1}100%{transform:scale(1.3);opacity:0}}
 #cbu .bub{fill:rgba(255,230,140,.9)}
 #pfl,#pfl2,#cfl,#cfl2{animation:fk .16s infinite alternate}@keyframes fk{to{opacity:.75}}
+.mt b{z-index:1}
+.mt i,.mt.bl i{opacity:1;z-index:2;background:repeating-linear-gradient(135deg,rgba(46,160,67,.5) 0 3px,rgba(46,160,67,.12) 3px 6px);border-left:2px solid #35d058;border-right:2px solid #35d058;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+main{gap:6px;padding:6px}.pn{padding:8px}h2{font-size:14px}h1,h2{margin-bottom:4px}
+.top{padding:6px 10px;flex-wrap:wrap}#clk{font-size:22px}#al{min-height:18px;font-size:13px;width:100%;text-align:left}
+#hint{padding:6px 8px;font-size:12px}
+.mr{margin:1px 0}.mr label{font-size:10.5px}.mr svg{width:12px!important;height:12px!important;margin-right:2px!important;vertical-align:-2px!important}
+.mt{height:10px}.bsn .grid{gap:0}
+#potv{width:84px;height:84px}#panv{width:100px;height:77px}
+.sl{margin-top:4px;display:flex;align-items:center;gap:8px}.sl label{flex-direction:column;align-items:flex-start;justify-content:flex-start;font-size:12px;line-height:1.25;width:104px;flex:none}
+.sl input{flex:1;min-width:0;margin:0;height:28px}
+.row{margin-top:4px}.row button{padding:8px 4px}.big{padding:12px}
+.ph-wash .ck{display:none!important}.ph-cook .wo{display:none!important}.ph-cook button small{display:none}
 </style>
 </head>
 <body>
-<main>
+<main id="mn" class="ph-wash">
 <section id="setup" class="pn">
   <h1>Dal Tadka, in real time</h1>
   <div class="dim" style="margin-bottom:8px">
@@ -81,9 +93,9 @@ textarea{width:100%;font:12px ui-monospace,monospace;background:var(--trk);color
 </section>
 
 <section id="play" class="hide" style="display:flex;flex-direction:column;gap:8px">
-  <div class="pn top"><b id="ln"></b><span id="clk">0:00.0</span></div>
+  <div class="pn top"><b id="ln"></b><span id="clk">0:00.0</span><div id="al"></div></div>
   <div class="pn" id="hint"></div>
-  <div class="pn" id="basp">
+  <div class="pn wo" id="basp">
     <h2 id="h_basin">Wash basin</h2>
     <div class="bsn">
       <svg id="bowl" viewBox="0 0 100 100" aria-label="Wash bowl, top view">
@@ -105,18 +117,18 @@ textarea{width:100%;font:12px ui-monospace,monospace;background:var(--trk);color
   </div>
   <div class="pn" id="potp">
     <h2 id="h_pot" style="margin:0 0 6px">Dal pot</h2>
-    <div class="bsn"><svg id="potv" class="vz" viewBox="0 0 100 100" width="104" height="104" aria-label="Pot, top view"><path id="pfl" fill="#4aa8ff"/><path id="pfl2" fill="#ffd54a"/><circle cx="50" cy="50" r="36" fill="#7b7f86"/><circle cx="50" cy="50" r="31" fill="#3d3a37"/><clipPath id="pcp"><circle id="pcc" cx="50" cy="50" r="29"/></clipPath><circle id="plq" cx="50" cy="50" r="29" fill="#8fd3f4"/><g clip-path="url(#pcp)"><g id="pbl"></g><g id="pb"></g><g id="pbu"></g></g><circle id="pfo" cx="50" cy="50" r="28" fill="none" stroke="#fff" style="stroke-width:0;opacity:0"/><circle id="pst" cx="50" cy="50" r="29" fill="none" stroke="#2e1a0c" stroke-width="3" stroke-dasharray="7 10" style="opacity:0"/><circle cx="50" cy="50" r="34" fill="none" stroke="#9ea3ab" stroke-width="4"/></svg><div id="potm" class="grid"></div></div>
-    <div class="sl"><label><span id="pl">Burner</span><span id="pdial"></span></label><input type="range" id="psl" min="0" max="10" step="1" value="0"><div class="sc"><span>Off</span><span>Low</span><span>Med</span><span>High</span></div></div>
-    <div class="row"><button data-a="water" class="blu">+ ADD WATER<small>1 cup, cools pot</small></button><button data-a="stir">STIR<small>stops sticking</small></button></div>
+    <div class="bsn ck"><svg id="potv" class="vz" viewBox="0 0 100 100" width="104" height="104" aria-label="Pot, top view"><path id="pfl" fill="#4aa8ff"/><path id="pfl2" fill="#ffd54a"/><circle cx="50" cy="50" r="36" fill="#7b7f86"/><circle cx="50" cy="50" r="31" fill="#3d3a37"/><clipPath id="pcp"><circle id="pcc" cx="50" cy="50" r="29"/></clipPath><circle id="plq" cx="50" cy="50" r="29" fill="#8fd3f4"/><g clip-path="url(#pcp)"><g id="pbl"></g><g id="pb"></g><g id="pbu"></g></g><circle id="pfo" cx="50" cy="50" r="28" fill="none" stroke="#fff" style="stroke-width:0;opacity:0"/><circle id="pst" cx="50" cy="50" r="29" fill="none" stroke="#2e1a0c" stroke-width="3" stroke-dasharray="7 10" style="opacity:0"/><circle cx="50" cy="50" r="34" fill="none" stroke="#9ea3ab" stroke-width="4"/></svg><div id="potm" class="grid"></div></div>
+    <div class="sl"><label><span id="pl">Burner</span><span id="pdial"></span></label><input type="range" id="psl" min="0" max="10" step="1" value="0"></div>
+    <div class="row ck"><button data-a="water" class="blu">+ ADD WATER<small>1 cup, cools pot</small></button><button data-a="stir">STIR<small>stops sticking</small></button></div>
   </div>
   <div class="pn">
     <h2 id="h_pan" style="margin:0 0 6px">Tadka pan</h2>
-    <div class="bsn"><svg id="panv" class="vz" viewBox="0 0 130 100" width="122" height="94" aria-label="Tadka pan, top view"><path id="cfl" fill="#4aa8ff"/><path id="cfl2" fill="#ffd54a"/><rect x="78" y="45" width="48" height="10" rx="5" fill="#5b5b60"/><circle cx="46" cy="50" r="36" fill="#6b6e75"/><circle id="cpan" cx="46" cy="50" r="31" fill="#2f2c2a"/><clipPath id="ccp"><circle id="ccc" cx="46" cy="50" r="0"/></clipPath><circle id="cgh" cx="46" cy="50" r="0" fill="#f2c230" opacity=".9"/><g clip-path="url(#ccp)"><g id="cbu"></g></g><g id="csp" style="opacity:0;transition:opacity .4s"><g id="csd"></g><g id="chb"></g><g id="cch"></g></g><circle id="csm" cx="46" cy="50" r="30" fill="#bbb" style="opacity:0"/><circle cx="46" cy="50" r="34" fill="none" stroke="#8c9097" stroke-width="3"/></svg><div id="panm" class="grid"></div></div>
-    <div class="sl"><label><span id="cl">Burner</span><span id="cdial"></span></label><input type="range" id="csl" min="0" max="10" step="1" value="0"><div class="sc"><span>Off</span><span>Low</span><span>Med</span><span>High</span></div></div>
-    <div class="row"><button data-a="ghee">1. ADD GHEE<small>aim for 2-3</small></button><button data-a="spice" id="b_spice">2. ADD SPICE<small>then hold 130-180°</small></button></div>
+    <div class="bsn ck"><svg id="panv" class="vz" viewBox="0 0 130 100" width="122" height="94" aria-label="Tadka pan, top view"><path id="cfl" fill="#4aa8ff"/><path id="cfl2" fill="#ffd54a"/><rect x="78" y="45" width="48" height="10" rx="5" fill="#5b5b60"/><circle cx="46" cy="50" r="36" fill="#6b6e75"/><circle id="cpan" cx="46" cy="50" r="31" fill="#2f2c2a"/><clipPath id="ccp"><circle id="ccc" cx="46" cy="50" r="0"/></clipPath><circle id="cgh" cx="46" cy="50" r="0" fill="#f2c230" opacity=".9"/><g clip-path="url(#ccp)"><g id="cbu"></g></g><g id="csp" style="opacity:0;transition:opacity .4s"><g id="csd"></g><g id="chb"></g><g id="cch"></g></g><circle id="csm" cx="46" cy="50" r="30" fill="#bbb" style="opacity:0"/><circle cx="46" cy="50" r="34" fill="none" stroke="#8c9097" stroke-width="3"/></svg><div id="panm" class="grid"></div></div>
+    <div class="sl"><label><span id="cl">Burner</span><span id="cdial"></span></label><input type="range" id="csl" min="0" max="10" step="1" value="0"></div>
+    <div class="row"><button data-a="ghee" id="b_ghee">ADD GHEE</button><button data-a="spice" id="b_spice" class="ck">ADD SPICE</button></div>
   </div>
-  <button class="big" id="serve" data-a="serve" disabled>SERVE: pour tadka over dal</button>
-  <div id="al"></div><div id="log"></div>
+  <button class="big ck" id="serve" data-a="serve" disabled>SERVE: pour tadka over dal</button>
+  
 </section>
 
 <section id="res" class="pn hide"></section>
@@ -156,7 +168,7 @@ const iRi=ic('<rect x="4" y="8" width="16" height="8" rx="2"/><path d="M4 12h16"
 const iFi=ic('<path d="M12 2c0 0-5 4-5 10a5 5 0 0 0 10 0c0-6-5-10-5-10zm0 13a3 3 0 0 1-3-3c0-2 3-5 3-5s3 3 3 5a3 3 0 0 1-3 3z"/>');
 const iWr=ic('<path d="M12 2L2 22h20L12 2z"/><path d="M12 8v6"/><path d="M12 18v.01" stroke-width="3"/>');
 
-function mk(id,lb,mx,lo,hi,th){return `<div class="mr"><label>${lb}<em id="${id}v"></em></label><div class="mt ${th||''}"><i id="${id}b" style="left:${lo/mx*100}%;width:${(hi-lo)/mx*100}%"></i><b id="${id}f"></b></div></div>`}
+function mk(id,lb,mx,lo,hi,th){return `<div class="mr"><label>${lb}<em id="${id}v"></em></label><div class="mt ${th||''}"><b id="${id}f"></b>${hi>lo?`<i id="${id}b" style="left:${lo/mx*100}%;width:${(hi-lo)/mx*100}%"></i>`:''}</div></div>`}
 function sm(id,v,mx,t){$(id+'f').style.width=cl(v/mx*100,0,100)+'%';$(id+'v').textContent=t}
 function sb(id,mx,lo,hi){const e=$(id+'b');e.style.left=lo/mx*100+'%';e.style.width=(hi-lo)/mx*100+'%'}
 
@@ -164,7 +176,7 @@ $('h_basin').innerHTML=iWa+'Wash basin';$('h_pot').innerHTML=iPo+'Dal pot';$('h_
 $('pl').innerHTML=iFi+'Pot burner';$('cl').innerHTML=iFi+'Pan burner';
 
 $('basin').innerHTML=mk('sed',iDr+'GRIT REMOVED',100,0,0,'br')+mk('bd',iWa+'WATER DIRT',100,0,0,'bl')+mk('mass',iPo+'DAL SAVED',10,8,10);
-$('potm').innerHTML=mk('pt',iFi+'TEMP (70-85°)',120,70,85)+mk('pw',iDr+'WATER (green = ideal)',10,3,5,'bl')+mk('pc',iTi+'COOKED (fill it)',125,100,125)+mk('pf',iWr+'BOIL-OVER',1,0,0,'w')+mk('ps',iWr+'STICKING',1,0,0,'w');
+$('potm').innerHTML=mk('pt',iFi+'TEMP (70-85°)',120,70,85)+mk('pw',iDr+'WATER',10,3,5,'bl')+mk('pc',iTi+'COOKED',125,100,125)+mk('pf',iWr+'BOIL-OVER',1,0,0,'w')+mk('ps',iWr+'STICKING',1,0,0,'w');
 $('panm').innerHTML=mk('ct',iFi+'TEMP (130-155°)',250,130,155)+mk('cr',iRi+'GHEE',5,2,3)+mk('cf',iFl+'FLAVOR',8,4,5)+mk('cb',iWr+'BURN',10,0,0,'w');
 
 // bowl grains (fixed pseudo-random layout)
@@ -192,8 +204,7 @@ menu();loadLB();
 const mass=()=>Math.max(1,10-S.spill),scl=()=>.5+mass()/20;
 function say(m,c){
   const a=$('al');a.textContent=m;a.style.color=c==='b'?'var(--bad)':c==='g'?'var(--good)':'var(--ink)';
-  const d=document.createElement('div');d.textContent=S.t.toFixed(1)+'s  '+m;$('log').prepend(d);
-  while($('log').children.length>6)$('log').lastChild.remove();
+  clearTimeout(say.t);say.t=setTimeout(()=>{$('al').textContent=''},5000);
 }
 function spoil(n,sp){S.spoils.push({name:n,sp});say(n+'! Spoil '+sp,'b')}
 
@@ -201,7 +212,7 @@ function start(k){
   S={k,L:LENT[k],t:0,phase:'wash',spill:0,grit:100,basin:'full',waterDirt:0,rinse:0,saved:false,
      pot:{dial:0,temp:25,water:5,cooked:0,foam:0,stick:0},
      pan:{dial:0,temp:25,rich:0,flav:0,burn:0,spice:false},spoils:[]};
-  $('setup').classList.add('hide');$('res').classList.add('hide');$('play').classList.remove('hide');$('log').innerHTML='';$('ln').textContent=S.L.n+' dal';$('al').textContent='';
+  $('setup').classList.add('hide');$('res').classList.add('hide');$('play').classList.remove('hide');$('ln').textContent=S.L.n+' dal';$('al').textContent='';
   $('b_spice').disabled=false;
   last=performance.now();acc=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);R();
 }
@@ -270,7 +281,7 @@ function R(){
   sm('pf',p.foam,1,p.foam>.6?'⚠':'');sm('ps',p.stick,1,p.stick>.6?'⚠':'');
   sm('ct',c.temp,250,Math.round(c.temp)+'°');sm('cr',c.rich,5,c.rich.toFixed(1));
   sm('cf',c.flav,8,c.flav.toFixed(1));sm('cb',c.burn,10,c.burn>6?'⚠':'');
-  $('pdial').textContent=p.dial+' / 10';$('cdial').textContent=c.dial+' / 10';$('psl').value=p.dial;$('csl').value=c.dial;
+  $('pdial').textContent=p.dial+' / 10 · '+Math.round(p.temp)+'°';$('cdial').textContent=c.dial+' / 10 · '+Math.round(c.temp)+'°';$('psl').value=p.dial;$('csl').value=c.dial;
   $('basp').classList.toggle('off',S.phase!=='wash');$('serve').disabled=S.phase!=='cook';
   // bowl: water colour goes from clear blue to muddy brown; grit specks fade as grit is removed
   const d=S.waterDirt/100,mixc=(a,b)=>Math.round(a+(b-a)*d);
@@ -278,6 +289,8 @@ function R(){
   $('bw').style.opacity=S.basin==='full'?.9:.6;
   $('gt').style.opacity=S.grit/100;
   $('sw').classList.toggle('spin',!!S.rinse);$('sw').style.animationDuration=[0,3,1.5,.7][S.rinse]+'s';
+  $('mn').className='ph-'+(S.phase==='wash'?'wash':'cook');
+  const gt='ADD GHEE<small>'+c.rich.toFixed(1)+' (aim 2-3)</small>';if($('b_ghee').dataset.t!==gt){$('b_ghee').dataset.t=gt;$('b_ghee').innerHTML=gt}
   // pot + pan visuals
   const raw=RAW[S.k],ckd=COOK[S.k],f=p.cooked/need,tt=cl(f,0,1),wet=S.phase!=='wash';
   let lc=mixv([143,211,244],ckd,tt*tt*(3-2*tt));
@@ -300,8 +313,8 @@ function R(){
   $('csm').style.opacity=cl((c.temp-190)/50,0,.6);
   flame('pfl','pfl2',50,50,34,p.dial*1.15,p.dial/10);flame('cfl','cfl2',46,50,34,c.dial*1.15,c.dial/10);
   $('hint').innerHTML=S.phase==='wash'
-    ?'<b>Step 1: wash.</b> Hold a wash button until GRIT REMOVED is near 100%. Change the water when it goes murky (washing in dirty water barely cleans). Meanwhile you can start the pot and pan. Press DONE when clean.'
-    :'<b>Step 2: cook.</b> Keep TEMP and WATER in the green zones and fill COOKED. In the pan: ghee first, then spice, hold 130-180°. SERVE when both are ready.';
+    ?'<b>Step 1: wash.</b> Hold a wash button until grit is gone; change the water when it turns murky. You can also start the burners and add ghee. Then press DONE.'
+    :'<b>Step 2: cook.</b> Keep the pot in the green zones. In the pan add spice and hold 130-180°, then SERVE.';
   if(S.phase==='wash'){
       const isF=S.basin==='full';
       $('b_fill').firstChild.nodeValue=isF?'CHANGE WATER ':'FILL WATER ';
@@ -332,7 +345,7 @@ document.addEventListener('click',e=>{
   const a=b.dataset.a,p=S.pot,c=S.pan;
   if(a==='fill'){S.basin='full';S.waterDirt=0;ff(2);say('Filled basin with fresh water.')}
   else if(a==='wdone'&&S.phase==='wash'){
-      S.phase='cook';S.rinse=0;say('Washing done. Dal moved to the pot.','g');
+      S.phase='cook';S.rinse=0;say('Washing done. Dal moved to the pot.','g');window.scrollTo(0,0);
       if(p.water<=0)spoil('BOILED DRY',2);
   }
   else if(a==='water'){p.water=Math.min(10,p.water+1);p.temp-=10;say('Added a cup of water to pot.')}
