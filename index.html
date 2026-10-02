@@ -364,7 +364,7 @@ function saveScore(){
   const en={name,lentil:S.k,score:S.final,date:new Date().toISOString().slice(0,10)};
   try{localStorage.setItem('dal:lb',JSON.stringify([...lget('dal:lb',[]),en]))}catch(e){}
   $('lbr').innerHTML=boardHTML(S.k,5);
-  if(API){fetch(API,{method:'POST',mode:'no-cors',body:JSON.stringify(en)}).then(loadLB).then(()=>{if($('lbr'))$('lbr').innerHTML=boardHTML(S.k,5)}).catch(()=>{});$('sv').innerHTML='<div class="dim" style="font-size:13px">Saved to the shared leaderboard.</div>';return}
+  if(API){$('sv').innerHTML='<div class="dim" style="font-size:13px">Saving to the shared leaderboard...</div>';fetch(API+'?'+new URLSearchParams(en)).then(r=>r.json()).then(j=>{LB=j.entries||[];if(!LB.some(x=>x.name===en.name&&x.score===en.score))throw 0;if($('lbr'))$('lbr').innerHTML=boardHTML(S.k,5);$('sv').innerHTML='<div class="dim" style="font-size:13px">Saved to the shared leaderboard.</div>'}).catch(()=>{$('sv').innerHTML='<div style="color:var(--bad);font-size:13px">The shared leaderboard did not record this score (kept on this device only). Check that the latest script is deployed as a New version with access set to Anyone.</div>'});return}
   $('sv').innerHTML=`<div class="dim" style="font-size:13px;margin-bottom:6px">Saved on this device. To share with friends, copy this line into the "entries" list in leaderboard.json and commit it (commas between entries, none after the last).</div><textarea id="ent" rows="2" readonly>${esc(JSON.stringify(en))}</textarea><button data-x="copy" style="margin-top:6px">COPY ENTRY</button>`;
 }
 </script>
