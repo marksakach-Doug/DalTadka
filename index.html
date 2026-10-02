@@ -101,13 +101,13 @@ textarea{width:100%;font:12px ui-monospace,monospace;background:var(--trk);color
   <div class="pn" id="potp">
     <h2 id="h_pot" style="margin:0 0 6px">Dal pot</h2>
     <div id="potm" class="grid"></div>
-    <div class="sl"><label><span id="pl">Burner</span><span id="pdial"></span></label><input type="range" id="psl" min="0" max="5" step="1" value="0"><div class="sc"><span>Off</span><span>Low</span><span>Med</span><span>High</span></div></div>
+    <div class="sl"><label><span id="pl">Burner</span><span id="pdial"></span></label><input type="range" id="psl" min="0" max="10" step="1" value="0"><div class="sc"><span>Off</span><span>Low</span><span>Med</span><span>High</span></div></div>
     <div class="row"><button data-a="water" class="blu">+ ADD WATER<small>1 cup, cools pot</small></button><button data-a="stir">STIR<small>stops sticking</small></button></div>
   </div>
   <div class="pn">
     <h2 id="h_pan" style="margin:0 0 6px">Tadka pan</h2>
     <div id="panm" class="grid"></div>
-    <div class="sl"><label><span id="cl">Burner</span><span id="cdial"></span></label><input type="range" id="csl" min="0" max="5" step="1" value="0"><div class="sc"><span>Off</span><span>Low</span><span>Med</span><span>High</span></div></div>
+    <div class="sl"><label><span id="cl">Burner</span><span id="cdial"></span></label><input type="range" id="csl" min="0" max="10" step="1" value="0"><div class="sc"><span>Off</span><span>Low</span><span>Med</span><span>High</span></div></div>
     <div class="row"><button data-a="ghee">1. ADD GHEE<small>aim for 2-3</small></button><button data-a="spice" id="b_spice">2. ADD SPICE<small>then hold 130-180°</small></button></div>
   </div>
   <button class="big" id="serve" data-a="serve" disabled>SERVE: pour tadka over dal</button>
@@ -200,7 +200,7 @@ function step(dt){
       S.waterDirt=Math.min(100,S.waterDirt+removed*3.5);
       S.spill+=rate[1]*dt;
   }
-  c.temp+=(25+c.dial*43-c.temp)*.22*dt;
+  c.temp+=(25+c.dial*21.5-c.temp)*.22*dt;
   if(c.temp>=240){spoil('PAN FIRE',1);c.temp=150;c.dial=0}
   if(c.spice){
       const t=c.temp;
@@ -213,7 +213,7 @@ function step(dt){
           if(c.burn>=10&&!S.spoils.find(x=>x.name==='SPICE BURNED'))spoil('SPICE BURNED',2);
       }
   }
-  p.temp+=(25+p.dial*19-p.temp)*.12*dt;
+  p.temp+=(25+p.dial*9.5-p.temp)*.12*dt;
   if(p.temp>=70)p.water-=(p.temp-65)/35*.02*dt;
   if(p.water<=0){
       if(S.phase==='cook'&&!S.spoils.find(x=>x.name==='BOILED DRY'))spoil('BOILED DRY',2);
@@ -251,7 +251,7 @@ function R(){
   sm('pf',p.foam,1,p.foam>.6?'⚠':'');sm('ps',p.stick,1,p.stick>.6?'⚠':'');
   sm('ct',c.temp,250,Math.round(c.temp)+'°');sm('cr',c.rich,5,c.rich.toFixed(1));
   sm('cf',c.flav,8,c.flav.toFixed(1));sm('cb',c.burn,10,c.burn>6?'⚠':'');
-  $('pdial').textContent=p.dial+' / 5';$('cdial').textContent=c.dial+' / 5';$('psl').value=p.dial;$('csl').value=c.dial;
+  $('pdial').textContent=p.dial+' / 10';$('cdial').textContent=c.dial+' / 10';$('psl').value=p.dial;$('csl').value=c.dial;
   $('basp').classList.toggle('off',S.phase!=='wash');$('serve').disabled=S.phase!=='cook';
   // bowl: water colour goes from clear blue to muddy brown; grit specks fade as grit is removed
   const d=S.waterDirt/100,mixc=(a,b)=>Math.round(a+(b-a)*d);
@@ -337,23 +337,17 @@ function finish(){
   const prev=best(S.k);if(score>prev)save(S.k,score);
   const [g,gc]=grade(q);
   const paceTxt=x<=.25?'Speed demon: big speed bonus.':x>=.75?'Slow and deliberate: big care bonus.':'Middle pace: the smallest bonus. Go faster or slower to earn more.';
-  const row=(r)=>{const ok=r[2]>=80,mid=r[2]>=50,col=ok?'--good':mid?'--acc':'--bad';return `<div class="cmp"><span class="ic" style="color:var(${col})">${ok?'✓':mid?'~':'✗'}</span><div style="flex:1"><div style="display:flex;justify-content:space-between"><b>${r[0]}${r[1]}</b><b style="color:var(${col})">${r[2].toFixed(0)}%</b></div><div class="bar"><b style="width:${r[2]}%;background:var(${col})"></b></div><div class="dim" style="font-size:13px">${r[3]}</div></div></div>`};
+  const row=(r)=>{const ok=r[2]>=80,mid=r[2]>=50,col=ok?'--good':mid?'--acc':'--bad';return `<div class="cmp" style="padding:4px 0"><span class="ic" style="color:var(${col})">${ok?'✓':mid?'~':'✗'}</span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${r[0]}${r[1]}</b><b style="color:var(${col})">${r[2].toFixed(0)}%</b></div><div class="bar" style="margin:2px 0"><b style="width:${r[2]}%;background:var(${col})"></b></div>${r[2]<85?`<div class="dim" style="font-size:12px;line-height:1.3">${r[3]}</div>`:''}</div></div>`};
   $('play').classList.add('hide');$('res').classList.remove('hide');
   $('res').innerHTML=`<h1>Taste test: ${L.n}</h1>
-  <div style="display:flex;gap:16px;align-items:center;margin:8px 0 12px"><div class="gr" style="color:${gc}">${g}</div><div><div style="font:700 28px ui-monospace,monospace">${score}</div><div class="dim">${score>prev?'New personal best!':'Your best: '+prev}</div></div></div>
-  <h2>What went right and wrong</h2>${comps.map(row).join('')}
-  ${pens.length?`<h2 style="margin-top:12px;color:var(--bad)">Penalties</h2>`+pens.map(p=>`<div class="ev"><span>${iWr}${p[0]}</span><b style="color:var(--bad)">-${p[1].toFixed(0)}</b></div>`).join(''):''}
-  <h2 style="margin-top:12px">How the score was built</h2>
-  <div class="ev"><span>Average of 5 areas (60%)</span><b>${avg.toFixed(0)}</b></div>
-  <div class="ev"><span>Weakest area (40%)</span><b>${weak.toFixed(0)}</b></div>
-  <div class="ev"><span>Quality after penalties</span><b>${q.toFixed(0)}%</b></div>
-  <div class="ev"><span>Quality² multiplier</span><b style="color:${mult<.5?'var(--bad)':'var(--good)'}">×${mult.toFixed(2)}</b></div>
-  <div class="ev"><span>10,000 + pacing (+${pace})</span><b>${10000+pace}</b></div>
-  <p class="dim" style="font-size:13px;margin:6px 0">${paceTxt} Your time: ${S.t.toFixed(0)}s.</p>
-  <h2 style="margin-top:12px">Leaderboard</h2>
-  <div id="sv"><input type="text" id="nm" maxlength="20" placeholder="Your name" value="${esc((()=>{try{return localStorage.getItem('dal:name')||''}catch(e){return ''}})())}"><button class="ok" data-x="save" style="margin-top:6px">SAVE SCORE TO LEADERBOARD</button></div>
-  <div id="lbr">${boardHTML(S.k,5)}</div>
-  <button class="big" data-m="1" style="margin-top:12px">COOK AGAIN</button>`;
+  ${comps.map(row).join('')}
+  ${pens.map(p=>`<div class="ev" style="padding:3px 0;font-size:13px"><span style="color:var(--bad)">${iWr}${p[0]}</span><b style="color:var(--bad)">-${p[1].toFixed(0)}</b></div>`).join('')}
+  <div class="dim" style="font-size:12px;margin:6px 0;line-height:1.35">Quality ${q.toFixed(0)}% (average ${avg.toFixed(0)}, weakest area ${weak.toFixed(0)}, minus penalties) gives a ×${mult.toFixed(2)} multiplier. Score = (10,000 + ${pace} pacing) × ${mult.toFixed(2)}. ${paceTxt} Time: ${S.t.toFixed(0)}s.</div>
+  <div id="sv" style="display:flex;gap:6px"><input type="text" id="nm" maxlength="20" placeholder="Your name" value="${esc((()=>{try{return localStorage.getItem('dal:name')||''}catch(e){return ''}})())}"><button class="ok" data-x="save" style="width:auto;padding:8px 12px;white-space:nowrap">SAVE SCORE</button></div>
+  <div id="lbr" style="font-size:12px">${boardHTML(S.k,3)}</div>
+  <div style="display:flex;gap:16px;align-items:center;margin:10px 0 8px;border-top:2px solid var(--line);padding-top:8px"><div class="gr" style="color:${gc};font-size:48px">${g}</div><div><div style="font:700 28px ui-monospace,monospace">${score}</div><div class="dim">${score>prev?'New personal best!':'Your best: '+prev}</div></div></div>
+  <button class="big" data-m="1">COOK AGAIN</button>`;
+  window.scrollTo(0,document.body.scrollHeight);
 }
 
 function saveScore(){
@@ -361,8 +355,8 @@ function saveScore(){
   const name=($('nm').value.trim()||'Anon').slice(0,20);
   try{localStorage.setItem('dal:name',name)}catch(e){}
   const en={name,lentil:S.k,score:S.final,date:new Date().toISOString().slice(0,10)};
-  $('lbr').innerHTML=boardHTML(S.k,5);
-  if(API){$('sv').innerHTML='<div class="dim" style="font-size:13px">Saving to the shared leaderboard...</div>';fetch(API+'?'+new URLSearchParams(en)).then(r=>r.json()).then(j=>{LB=j.entries||[];if(!LB.some(x=>x.name===en.name&&x.score===en.score))throw 0;if($('lbr'))$('lbr').innerHTML=boardHTML(S.k,5);$('sv').innerHTML='<div class="dim" style="font-size:13px">Saved to the shared leaderboard.</div>'}).catch(()=>{$('sv').innerHTML='<div style="color:var(--bad);font-size:13px">The shared leaderboard did not record this score. Check that the latest script is deployed as a New version with access set to Anyone.</div>'});return}
+  $('lbr').innerHTML=boardHTML(S.k,3);
+  if(API){$('sv').innerHTML='<div class="dim" style="font-size:13px">Saving to the shared leaderboard...</div>';fetch(API+'?'+new URLSearchParams(en)).then(r=>r.json()).then(j=>{LB=j.entries||[];if(!LB.some(x=>x.name===en.name&&x.score===en.score))throw 0;if($('lbr'))$('lbr').innerHTML=boardHTML(S.k,3);$('sv').innerHTML='<div class="dim" style="font-size:13px">Saved to the shared leaderboard.</div>'}).catch(()=>{$('sv').innerHTML='<div style="color:var(--bad);font-size:13px">The shared leaderboard did not record this score. Check that the latest script is deployed as a New version with access set to Anyone.</div>'});return}
 }
 </script>
 </body>
