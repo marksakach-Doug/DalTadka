@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Dal Tadka: Real Time</title>
+<title>Dal Tadka</title>
 <style>
 :root{--bg:#f4ead8;--panel:#fffaf0;--ink:#2a1d12;--line:#d6c4a4;--dim:#7a6a58;--acc:#c2410c;--good:#2e7d32;--bad:#c62828;--trk:#ebdfc6;--wat:#0288d1;--grit:#8d5524;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#120E0A;--panel:#1A140F;--ink:#F0E6D2;--line:#3A2C21;--dim:#A89B8D;--acc:#FF9900;--good:#4CAF50;--bad:#F44336;--trk:#0A0806;--wat:#29b6f6;--grit:#b8793a}}
@@ -80,12 +80,12 @@ main{gap:6px;padding:6px}.pn{padding:8px}h2{font-size:14px}h1,h2{margin-bottom:4
 <body>
 <main id="mn" class="ph-wash">
 <section id="setup" class="pn">
-  <h1>Dal Tadka, in real time</h1>
+  <h1>Dal Tadka</h1>
   <div class="dim" style="margin-bottom:8px">
-    Wash the grit, simmer the dal, bloom the spices, then serve.
-    Score = (10,000 + <b>Pacing</b>) × <b>Quality</b>². Sloppy dal is punished hard: a 50% dal keeps only a quarter of the points.
+    3 steps: Wash the lentils, boil the dal, bloom the spices, then serve.
+    Score = (10,000 + <b>Pacing</b>) × <b>Quality</b>². Sloppy dal is punished hard. Make it good.
   </div>
-  <div class="dim">Pacing rewards extremes: rush for a speed bonus, or be very deliberate for a bigger care bonus. The moderate middle earns the least.</div>
+  <div class="dim">The people are hungry. Get them their food. But just know that the best food is cooked with care. It will never come out better when cooked quickly.</div>
   <div id="lents" style="margin-top:12px"></div>
   <h2 style="margin-top:14px">Leaderboard</h2>
   <div class="tabs" id="lbt"></div>
@@ -137,7 +137,7 @@ main{gap:6px;padding:6px}.pn{padding:8px}h2{font-size:14px}h1,h2{margin-bottom:4
 const $=i=>document.getElementById(i),cl=(v,a,b)=>Math.min(b,Math.max(a,v));
 const LENT={
  moong:{n:'Moong',d:'Quick and forgiving.',need:25,stick:.03,w:[3.5,4.8],par:55},
- masoor:{n:'Masoor',d:'Cooks fastest, narrow water window.',need:16,stick:.04,w:[3,4.2],par:45},
+ masoor:{n:'Masoor',d:'Cooks fastest, uses little water.',need:16,stick:.04,w:[3,4.2],par:45},
  chana:{n:'Chana',d:'Slow and thirsty.',need:50,stick:.02,w:[4.5,6],par:90},
  urad:{n:'Urad',d:'Sticky and demands attention.',need:34,stick:.085,w:[3.5,4.8],par:70}};
 const API='https://script.google.com/macros/s/AKfycbwhy40Gk_QPoVz-jEwe-I72_rqbudw_QeLxZcGz7e2BMH3kIYS0AWkBiRulJl-CfU5jyA/exec'; // Apps Script web app URL (see README)
