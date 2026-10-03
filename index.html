@@ -97,7 +97,7 @@ svg{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:
   <div style="margin-bottom:6px">A cooking game. Make a pot of dal and top it with <b>tadka</b>: spices sizzled in hot ghee.</div>
   <ol class="dir" style="color:var(--ink)"><li><b>Wash</b> the lentils until the grit is gone.</li><li><b>Boil</b> them in the pot with the right amount of water.</li><li><b>Bloom</b> spices in hot ghee in the pan.</li><li><b>Serve</b> it.</li></ol>
   <div class="dim" style="margin-bottom:8px">
-    Score = (10,000 + <b>Pacing</b>) × <b>Quality</b>². Sloppy dal is punished hard. Make it good.
+    Score = (10,000 + <b>Pacing</b>) × <b>Quality</b>². Sloppy dal is punished hard. Quality includes <b>Care</b>: wasted effort, ignored warnings and button-mashing all count against you. Make it good.
   </div>
   <div class="dim">The people are hungry. Get them their food. But just know that the best food is cooked with care. It will never come out better when cooked quickly.</div>
   <h2 style="margin-top:14px">Pick a lentil to start cooking</h2>
@@ -139,7 +139,7 @@ svg{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:
   </div>
   <div class="pn">
     <h2 id="h_pan" style="margin:0 0 6px">Tadka pan</h2>
-    <ol class="dir" id="dir"><li>Add <b>ghee</b> until it reads 2-3.</li><li>Heat the pan until the ghee bubbles.</li><li>Add <b>spice</b>, then hold the temperature in the green zone until FLAVOR reaches its green zone.</li><li>Turn the burner down so the spice doesn't burn, then <b>serve</b> once the dal is cooked.</li></ol>
+    <ol class="dir" id="dir"><li>Add <b>ghee</b> until it reads 2-3. An empty pan overheats fast, so add ghee before you heat.</li><li>Heat the pan until the ghee bubbles.</li><li>Add <b>spice</b>, then hold the temperature in the green zone until FLAVOR reaches its green zone.</li><li>Turn the burner down so the spice doesn't burn, then <b>serve</b> once the dal is cooked.</li></ol>
     <div class="bsn ck"><svg id="panv" class="vz" viewBox="0 0 130 100" width="122" height="94" aria-label="Tadka pan, top view"><path id="cfl" fill="#4aa8ff"/><path id="cfl2" fill="#ffd54a"/><rect x="78" y="45" width="48" height="10" rx="5" fill="#5b5b60"/><circle cx="46" cy="50" r="36" fill="#6b6e75"/><circle id="cpan" cx="46" cy="50" r="31" fill="#2f2c2a"/><clipPath id="ccp"><circle id="ccc" cx="46" cy="50" r="0"/></clipPath><circle id="cgh" cx="46" cy="50" r="0" fill="#f2c230" opacity=".9"/><g clip-path="url(#ccp)"><g id="cbu"></g></g><g id="csp" style="opacity:0;transition:opacity .4s"><g id="csd"></g><g id="chb"></g><g id="cch"></g></g><circle id="csm" cx="46" cy="50" r="30" fill="#bbb" style="opacity:0"/><circle cx="46" cy="50" r="34" fill="none" stroke="#8c9097" stroke-width="3"/></svg><div id="panm" class="grid"></div></div>
     <div class="sl"><label><span id="cl">Burner</span><span id="cdial"></span></label><div class="bn" id="cbn" role="group" aria-label="Pan burner level"></div></div>
     <div class="row"><button data-a="ghee" id="b_ghee">ADD GHEE</button><button data-a="spice" id="b_spice" class="ck">ADD SPICE</button></div>
@@ -183,6 +183,7 @@ const iTi=ic('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>');
 const iFl=ic('<path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>');
 const iRi=ic('<rect x="4" y="8" width="16" height="8" rx="2"/><path d="M4 12h16"/>');
 const iFi=ic('<path d="M12 2c0 0-5 4-5 10a5 5 0 0 0 10 0c0-6-5-10-5-10zm0 13a3 3 0 0 1-3-3c0-2 3-5 3-5s3 3 3 5a3 3 0 0 1-3 3z"/>');
+const iHe=ic('<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>');
 const iWr=ic('<path d="M12 2L2 22h20L12 2z"/><path d="M12 8v6"/><path d="M12 18v.01" stroke-width="3"/>');
 
 function mk(id,lb,mx,lo,hi,th){return `<div class="mr"><label>${lb}<em id="${id}v"></em></label><div class="mt ${th||''}"><b id="${id}f"></b>${hi>lo?`<i id="${id}b" style="left:${lo/mx*100}%;width:${(hi-lo)/mx*100}%"></i>`:''}</div></div>`}
@@ -228,7 +229,7 @@ function spoil(n,sp){S.spoils.push({name:n,sp});say(n+'! Spoil '+sp,'b')}
 function start(k){
   S={k,L:LENT[k],t:0,phase:'wash',spill:0,grit:100,basin:'full',waterDirt:0,rinse:0,saved:false,
      pot:{dial:0,temp:25,water:0,cooked:0,foam:0,stick:0},
-     pan:{dial:0,temp:25,rich:0,flav:0,burn:0,spice:false},spoils:[]};
+     pan:{dial:0,temp:25,rich:0,flav:0,burn:0,spice:false},spoils:[],care:{murk:0,over:0,clean:0,warn:0,dry:0,jam:0},nag:{},lw:''};
   $('setup').classList.add('hide');$('res').classList.add('hide');$('play').classList.remove('hide');$('ln').textContent=S.L.n+' dal';$('al').textContent='';
   $('b_spice').disabled=false;
   last=performance.now();acc=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);R();
@@ -247,7 +248,8 @@ function step(dt){
       S.waterDirt=Math.min(100,S.waterDirt+removed*3.5);
       S.spill+=rate[1]*dt;
   }
-  c.temp+=(25+c.dial*21.5-c.temp)*.22*dt;
+  const cDry=c.rich<=0; // ghee is the pan's buffer: an empty pan heats fast and runs far hotter
+  c.temp+=(25+c.dial*(cDry?34:21.5)-c.temp)*(cDry?.45:.22)*dt;
   if(c.temp>=240){spoil('PAN FIRE',1);c.temp=150;c.dial=0}
   if(c.spice){
       const t=c.temp;
@@ -260,23 +262,35 @@ function step(dt){
           if(c.burn>=10&&!S.spoils.find(x=>x.name==='SPICE BURNED'))spoil('SPICE BURNED',2);
       }
   }
-  p.temp+=(25+p.dial*9.5-p.temp)*.12*dt;
+  const pDry=p.water<=0; // water caps the pot at boiling; an empty pot just keeps getting hotter
+  p.temp+=((pDry?25+p.dial*30:Math.min(100,25+p.dial*9.5))-p.temp)*(pDry?.3:.12)*dt;
+  if(!pDry&&p.temp>100)p.temp=100;
   if(p.temp>=70)p.water-=(p.temp-65)/35*.02*dt;
-  if(p.water<=0){
-      if(S.phase==='cook'&&!S.spoils.find(x=>x.name==='BOILED DRY'))spoil('BOILED DRY',2);
-      p.water=S.phase==='cook'?.6:0;
-  }
+  p.water=Math.max(0,p.water);
   if(S.phase==='cook'){
-    if(p.temp>=70){
+    const wet=p.water>0;
+    if(wet)p.had=true;else if(p.had&&!S.spoils.find(x=>x.name==='BOILED DRY'))spoil('BOILED DRY',2);
+    if(wet&&p.temp>=70){
       p.cooked+=dt*(1+Math.min(.8,(p.temp-70)/50));
       p.water-=(p.temp-65)/35*.08*dt;
     }
-    p.foam=Math.max(0,p.foam+(p.temp>=92?.3:-.4)*dt);
+    p.foam=wet?Math.max(0,p.foam+(p.temp>=92?.3:-.4)*dt):0;
     if(p.foam>=1){spoil('BOIL OVER',1);p.foam=.3;p.water-=.4}
-    p.stick+=(p.temp>=70?1:.3)*L.stick*dt;
+    p.stick+=wet?(p.temp>=70?1:.3)*L.stick*dt:Math.max(.02,(p.temp-60)/250)*dt; // dry dal scorches fast once hot
     if(p.stick>=1){spoil('STUCK AND SCORCHED',1);p.stick=.3}
+    p.water=Math.max(0,p.water);
   }
+  // care: track heedless play (feeds the Care score)
+  const K=S.care;
+  if(S.phase==='wash'&&S.rinse&&S.basin==='full'){
+    if(S.waterDirt>50){K.murk+=dt*(S.waterDirt-50)/50;if(S.waterDirt>75)nag('murk','Murky water: washing barely works now. Change the water.')}
+    if(S.grit<3)K.over+=dt;
+  }
+  if(S.phase==='cook'&&(p.foam>.6||p.stick>.6||c.burn>6))K.warn+=dt;
+  if(c.rich<=0&&c.temp>150){K.dry+=dt;nag('dryc','The pan is empty and overheating. Add ghee or turn it down.')}
+  if(pDry&&p.temp>110){K.dry+=dt;nag('dryp','The pot is dry and overheating. Add water or turn it down.')}
 }
+function nag(k,m){if(S.t-(S.nag[k]??-99)>12){S.nag[k]=S.t;say(m,'b')}}
 
 function loop(n){
   if(!S||S.phase==='done')return;
@@ -314,12 +328,12 @@ function R(){
   let lc=mixv([143,211,244],ckd,tt*tt*(3-2*tt));
   if(f>1.1)lc=mixv(lc,[88,54,26],cl((f-1.1)/.8,0,.7));
   const lr=p.water<=.05?0:cl(12+p.water*1.7,10,29);
-  ['plq','pcc'].forEach(i=>$(i).setAttribute('r',lr));$('plq').setAttribute('fill',rgbs(lc));
+  $('plq').setAttribute('r',lr);$('pcc').setAttribute('r',lr||(wet?22:0));$('plq').setAttribute('fill',rgbs(lc));
   $('pb').setAttribute('fill',rgbs(raw));$('pb').style.opacity=wet?cl(1-f*1.25,0,1):0;
   $('pbl').setAttribute('fill',rgbs(mixv(lc,[255,255,255],.12)));$('pbl').style.opacity=wet?cl(f*1.25-.15,0,.8):0;
-  $('pbu').style.opacity=cl((p.temp-68)/26,0,1);$('pbu').style.setProperty('--bd',(2.4-cl((p.temp-70)/30,0,1)*1.6).toFixed(2)+'s');
+  $('pbu').style.opacity=lr?cl((p.temp-68)/26,0,1):0;$('pbu').style.setProperty('--bd',(2.4-cl((p.temp-70)/30,0,1)*1.6).toFixed(2)+'s');
   $('pfo').setAttribute('r',Math.max(lr-1,1));$('pfo').style.strokeWidth=p.foam*7;$('pfo').style.opacity=cl(p.foam*1.3,0,1);
-  $('pst').setAttribute('r',lr);$('pst').style.opacity=cl(p.stick,0,1);
+  $('pst').setAttribute('r',lr||24);$('pst').style.opacity=cl(p.stick,0,1);
   const bt=cl(c.flav/5.5,0,1),bn=cl(c.burn/10,0,1),gr=c.rich>0?cl(7+c.rich*4.6,0,29):0,dk=[20,12,6];
   $('csd').setAttribute('fill',rgbs(mixv(mixv([226,196,120],[112,66,26],bt),dk,bn)));
   $('chb').setAttribute('fill',rgbs(mixv(mixv([96,170,70],[74,58,28],cl(bt*1.1,0,1)),dk,bn)));
@@ -331,8 +345,8 @@ function R(){
   $('csm').style.opacity=cl((c.temp-190)/50,0,.6);
   flame('pfl','pfl2',50,50,34,p.dial*1.15,p.dial/10);flame('cfl','cfl2',46,50,34,c.dial*1.15,c.dial/10);
   $('hint').innerHTML=S.phase==='wash'
-    ?'<b>Step 1: wash.</b> HOLD a wash button under the bowl until the grit is gone; tap CHANGE WATER when it turns murky. The pot starts empty, so add water to it with + WATER. You can also start the burners and add ghee. Then press DONE.'
-    :'<b>Step 2: cook.</b> Keep the pot in the green zones and top up water as it boils off. Make the tadka in the pan by following its numbered steps, then SERVE.';
+    ?'<b>Step 1: wash.</b> HOLD a wash button under the bowl until the grit is gone; tap CHANGE WATER when it turns murky. Meanwhile you can heat water in the pot or ghee in the pan, but an empty pot or pan overheats fast. Then press DONE: the dal goes into the pot, and it needs water or it will scorch.'
+    :'<b>Step 2: cook.</b> Add water if the pot is dry. Keep the pot in the green zones and top up water as it boils off. Make the tadka in the pan by following its numbered steps, then SERVE.';
   if(S.phase==='wash'){
       const isF=S.basin==='full';
       $('b_fill').firstChild.nodeValue=isF?'CHANGE WATER ':'FILL WATER ';
@@ -374,20 +388,21 @@ document.addEventListener('click',e=>{
   if(!S||S.phase==='done')return;
   if(b.dataset.d!==undefined){(b.parentNode.id==='pbn'?S.pot:S.pan).dial=+b.dataset.d;return R()}
   const a=b.dataset.a,p=S.pot,c=S.pan;
-  if(a==='fill'){S.basin='full';S.waterDirt=0;ff(2);say('Filled basin with fresh water.')}
+  if(a==='fill'){if(S.waterDirt<35)S.care.clean++;S.basin='full';S.waterDirt=0;ff(2);say('Filled basin with fresh water.')}
   else if(a==='wdone'&&S.phase==='wash'){
-      if(p.water<=0){say('The pot is empty. Add water to the pot first.','b');$('b_wp').scrollIntoView({block:'center',behavior:'smooth'});flash(['b_wp']);return R()}
-      S.phase='cook';S.rinse=0;say('Washing done. Dal moved to the pot.','g');window.scrollTo(0,0);
+      S.phase='cook';S.rinse=0;window.scrollTo(0,0);
+      if(p.water<=0){say('The dal is in a DRY pot. Add water now or it will scorch.','b');flash(['b_wp'])}else say('Washing done. Dal moved to the pot.','g');
   }
-  else if(a==='water'){p.water=Math.min(10,p.water+1);p.temp=Math.max(25,p.temp-10);say('Added a cup of water to pot.')}
-  else if(a==='unwater'){const fl=S.phase==='cook'?.5:0;p.water=Math.max(Math.min(p.water,fl),p.water-1);say('Took a cup of water out of the pot.')}
-  else if(a==='stir'&&S.phase==='cook'){p.stick=0;p.foam=Math.max(0,p.foam-.2);say('Stirred.')}
+  else if(a==='water'){if(p.water>=10||S.lw==='-')S.care.jam++;S.lw='+';p.water=Math.min(10,p.water+1);p.temp=Math.max(25,p.temp-10);say('Added a cup of water to pot.')}
+  else if(a==='unwater'){const fl=S.phase==='cook'?.5:0;if(p.water<=fl||S.lw==='+')S.care.jam++;S.lw='-';p.water=Math.max(Math.min(p.water,fl),p.water-1);say('Took a cup of water out of the pot.')}
+  else if(a==='stir'&&S.phase==='cook'){if(p.stick<.2&&p.foam<.2)S.care.jam++;p.stick=0;p.foam=Math.max(0,p.foam-.2);say('Stirred.')}
   else if(a==='ghee'){
+    if(c.rich>=4.2)S.care.jam++;
     c.rich=Math.min(5,c.rich+.8);c.temp-=15;
     if(c.temp+15>200){spoil('GHEE SMOKE',1);c.temp-=30}else say('Ghee melting in.')
   }
   else if(a==='spice'){
-    if(c.rich<=0)say('Added spices, but no ghee to bloom in!','b');
+    if(c.rich<=0){S.care.jam+=2;say('Added spices, but no ghee to bloom in!','b')}
     else say('Spices added to pan. Manage temperature to bloom.');
     c.spice=true;b.disabled=true;
   }
@@ -408,7 +423,16 @@ function finish(){
    [iTi,'Texture / doneness',qCook,qCook>=85?'Cooked just right.':p.cooked<need?`Undercooked: ${Math.floor(p.cooked)}s of ${Math.ceil(need)}s. Keep the pot above 70° and wait for COOKED to fill.`:`Overcooked: ${Math.floor(p.cooked)}s of ${Math.ceil(need)}s. Serve sooner.`],
    [iFl,'Spice flavor',qFlav,qFlav>=85?'Spices fully bloomed.':c.flav<idealF?(c.spice?'Spices barely bloomed. Hold the pan at 130-180° after adding them.':'You never added spice.'):'Flavor overshot. Spices cooked too long or too hot.'],
    [iRi,'Ghee',qRich,qRich>=85?'Good amount of ghee.':c.rich<idealR?`Not enough ghee (${c.rich.toFixed(1)}, aim for 2-3).`:`Too much ghee (${c.rich.toFixed(1)}, aim for 2-3).`]];
-  const vals=comps.map(x=>x[2]),avg=vals.reduce((a,b)=>a+b,0)/5,weak=Math.min(...vals);
+  const K=S.care,causes=[
+   [K.murk*3,`You kept scrubbing in murky water (about ${K.murk.toFixed(0)}s of wasted effort). Change the water once it turns murky.`],
+   [K.over*4,'You kept washing dal that was already clean, which only spills dal.'],
+   [K.clean*4,`You changed water that was still clean (${K.clean}x).`],
+   [K.warn*3,`You left a warning (boil-over, sticking, burning) alone for ${K.warn.toFixed(0)}s.`],
+   [K.dry*3,`You left an empty pot or pan heating for ${K.dry.toFixed(0)}s.`],
+   [K.jam*3,`${K.jam} pointless or second-guessed presses (water back and forth, stirring a calm pot, ghee when full, spice with no ghee).`]];
+  const qCare=cl(100-causes.reduce((a,x)=>a+x[0],0),0,100);
+  comps.push([iHe,'Care',qCare,qCare>=85?'Attentive from start to finish.':causes.filter(x=>x[0]>=3).sort((a,b)=>b[0]-a[0]).slice(0,2).map(x=>x[1]).join(' ')]);
+  const vals=comps.map(x=>x[2]),avg=vals.reduce((a,b)=>a+b,0)/vals.length,weak=Math.min(...vals);
   let q=avg*.6+weak*.4;const pens=[];
   if(c.burn>0){const bp=Math.min(50,c.burn*5);q-=bp;pens.push(['Burnt spices',bp])}
   const grp={};S.spoils.forEach(s=>{grp[s.name]=(grp[s.name]||0)+s.sp});
