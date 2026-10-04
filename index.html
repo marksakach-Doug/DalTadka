@@ -237,7 +237,8 @@ const nFive=()=>BASE.filter(k=>sBest(k)>=5).length+(sBest('double')>=5?1:0),allF
 let ADV=false;try{ADV=localStorage.getItem('dal:adv')==='1'}catch(e){}
 // Full tadka: cumin > hing > ginger > garlic > Kashmiri chili, pour over dal, garam masala, cilantro
 const SPICES=[{n:'Cumin seeds',btn:'ADD CUMIN SEEDS',need:4,cool:0},{n:'Hing',btn:'ADD HING',need:1.5,cool:0},{n:'Ginger',btn:'ADD GINGER',need:4.5,cool:12},{n:'Garlic',btn:'ADD GARLIC',need:2.5,cool:8},{n:'Kashmiri chili',btn:'ADD KASHMIRI CHILI',need:1.5,cool:0}];
-const ADVDIR=['Add <b>ghee</b> (2-3) and heat the pan until it bubbles.','<b>Cumin seeds</b>: until they crackle and brown.','<b>Hing</b>: only a few seconds.','<b>Ginger</b>: until golden brown.','<b>Garlic</b>: shorter than the ginger.','<b>Kashmiri chili</b>: just until it darkens.','<b>Pour</b> over the dal, then garam masala and cilantro.'];
+const ADVDIR=['Add <b>ghee</b> (2-3) and heat the pan until it bubbles.','<b>Cumin seeds</b>: until they crackle and brown.','<b>Hing</b>: only a few seconds.','<b>Ginger</b>: until golden brown.','<b>Garlic</b>: shorter than the ginger.','<b>Kashmiri chili</b>: just until it darkens.','Once the dal is cooked, <b>pour</b> over it, then garam masala and cilantro.'];
+function dalReady(){const p=S.pot,L=S.L,sc=scl();return S.phase==='cook'&&p.cooked>=L.need*sc*.95&&(!L.double||(p.in2&&p.cooked2>=L.B.need*sc*.95))}
 const rateAt=t=>t>=155&&t<=180?1:t>=130&&t<155?.4:t>=100&&t<130?.1:t>180?.3:0;
 const advScore=v=>v<90?Math.max(0,100-(90-v)*1.2):v>125?Math.max(0,100-(v-125)*2):100;
 const SIMPLE=$('dir').innerHTML,SERVE_T=$('serve').textContent;
@@ -247,7 +248,7 @@ function renderTdk(){
    :`<div class="lc locked" style="margin-top:12px"><i class="sw" style="background:var(--line)"></i><span class="lt"><b>Full tadka</b> <span class="dim">cumin, hing, ginger, garlic, Kashmiri chili, garam masala, cilantro</span><br>${UNLOCK.tadka()}</span><span class="go">LOCKED</span></div>`;
 }
 function advStep(){
-  const c=S.pan;if(c.st>=8)return;
+  const c=S.pan;if(c.st>=8||(c.st===5&&!dalReady()))return;
   let msg='',col='';
   if(c.st>=1&&c.st<=5){const sp=SPICES[c.st-1],v=c.prog/sp.need*100;c.pg[c.st-1]=v;msg=sp.n+': '+(v<90?'undercooked':v<=125?'perfect':v<=140?'a bit over':'burnt')+'. ';col=advScore(v)>=80?'g':'b'}
   if(c.st<5){
@@ -262,8 +263,8 @@ function advUI(c){
   const st=c.st,act=st>=1&&st<=5?SPICES[st-1]:null,pct=act?c.prog/act.need*100:0,lab=act?act.n.toUpperCase():'SPICES',nv=$('cfv').previousSibling;
   if(nv.nodeValue!==lab)nv.nodeValue=lab;
   sb('cf',160,90,125);sm('cf',pct,160,act?(pct<90?'raw ':pct<=125?'READY ':pct<=140?'over ':'BURNT ')+Math.round(pct)+'%':'');
-  const bt=st<5?SPICES[st].btn:st===5?'POUR TADKA OVER DAL':st===6?'SPRINKLE GARAM MASALA':st===7?'TOP WITH CILANTRO':'TADKA COMPLETE',b=$('b_spice');
-  if(b.dataset.t!==bt){b.dataset.t=bt;b.textContent=bt}b.disabled=st>=8;
+  const bt=st<5?SPICES[st].btn:st===5?(dalReady()?'POUR TADKA OVER DAL':'HOLD: DAL STILL COOKING'):st===6?'SPRINKLE GARAM MASALA':st===7?'TOP WITH CILANTRO':'TADKA COMPLETE',b=$('b_spice');
+  if(b.dataset.t!==bt){b.dataset.t=bt;b.textContent=bt}b.disabled=st>=8||(st===5&&!dalReady());
   const ds=st===0?0:Math.min(st,6),sig=ds+'|'+c.pg.join(','),dr=$('dir');
   if(dr.dataset.s!==sig){dr.dataset.s=sig;dr.innerHTML=ADVDIR.map((t,i)=>{const v=i>=1&&i<=5?c.pg[i-1]:null,q=v==null?-1:advScore(v);return `<li class="${i===ds?'now':''}">${t}${q<0?'':q>=80?' ✓':q>=50?' ~':' ✗'}</li>`}).join('')}
 }
@@ -306,7 +307,7 @@ function start(k,combo){
      pan:{dial:0,temp:25,rich:0,flav:0,burn:0,spice:false,st:0,prog:0,pg:[],gm:0,ci:0},spoils:[],care:{murk:0,over:0,clean:0,warn:0,dry:0,jam:0},nag:{},lw:''};
   $('setup').classList.add('hide');$('res').classList.add('hide');$('play').classList.remove('hide');$('ln').textContent=L.double?L.A.n+' + '+L.B.n:L.n+' dal';$('al').textContent='';
   $('b_spice').disabled=false;$('b_spice').textContent='ADD SPICE';$('b_spice').dataset.t='';$('b_spice').classList.remove('pulse');
-  $('dir').dataset.s='';$('dir').innerHTML=adv?'':SIMPLE;$('serve').textContent=adv?'SERVE':SERVE_T;
+  $('dir').dataset.s='';$('dir').innerHTML=adv?'':SIMPLE;$('serve').dataset.t='';
   sb('cf',8,4,5);$('cfv').previousSibling.nodeValue='FLAVOR';if(adv)S.title+=' · full tadka';
   const dd=!!L.double;$('pc2w').classList.toggle('hide',!dd);$('b_add2').classList.toggle('hide',!dd);$('b_add2').disabled=false;
   $('pcv').previousSibling.nodeValue=dd?L.A.n.toUpperCase()+' COOKED':'COOKED';
@@ -396,7 +397,7 @@ function R(){
   if(S.adv)advUI(c);else sm('cf',c.flav,8,c.flav.toFixed(1));sm('cb',c.burn,10,c.burn>6?'⚠':'');
   $('pdial').textContent=p.dial+' / 10 · '+Math.round(p.temp)+'°';$('cdial').textContent=c.dial+' / 10 · '+Math.round(c.temp)+'°';paintBn('pbn',p.dial);paintBn('cbn',c.dial);
   if(!S.adv){const ds=c.spice?(c.flav>=4?3:2):(c.rich<2?0:1),dr=$('dir');if(dr.dataset.s!==String(ds)){dr.dataset.s=ds;[...dr.children].forEach((l,i)=>l.classList.toggle('now',i===ds))}}
-  $('basp').classList.toggle('off',S.phase!=='wash');$('serve').disabled=S.phase!=='cook';
+  $('basp').classList.toggle('off',S.phase!=='wash');{const rd=dalReady(),sv=$('serve'),tx=rd?(S.adv?'SERVE':SERVE_T):'SERVE unlocks when the dal is cooked';sv.disabled=!rd;if(sv.dataset.t!==tx){sv.dataset.t=tx;sv.textContent=tx}}
   // bowl: water colour goes from clear blue to muddy brown; grit specks fade as grit is removed
   const d=S.waterDirt/100,mixc=(a,b)=>Math.round(a+(b-a)*d);
   $('bw').setAttribute('fill',S.basin==='full'?`rgb(${mixc(143,128)},${mixc(211,98)},${mixc(244,58)})`:'#6e6252');
@@ -428,7 +429,7 @@ function R(){
   flame('pfl','pfl2',50,50,34,p.dial*1.15,p.dial/10);flame('cfl','cfl2',46,50,34,c.dial*1.15,c.dial/10);
   $('hint').innerHTML=S.phase==='wash'
     ?'<b>Step 1: wash.</b> HOLD a wash button under the bowl until the grit is gone; tap CHANGE WATER when it turns murky. Meanwhile you can heat water in the pot or ghee in the pan, but an empty pot or pan overheats fast. Then press DONE: the dal goes into the pot, and it needs water or it will scorch.'
-    :'<b>Step 2: cook.</b> Add water if the pot is dry. Keep the pot in the green zones and top up water as it boils off. Make the tadka in the pan by following its numbered steps, then SERVE.'+(S.L.double?' DOUBLE DAL: '+S.L.A.n+' is in the pot. Add '+S.L.B.n+' when COOKED reaches the black mark, so both finish together.':'')+(S.adv?' FULL TADKA: each tap of the spice button adds the next spice and judges the last one, so tap when its meter is in the green.':'');
+    :'<b>Step 2: cook.</b> Add water if the pot is dry. Keep the pot in the green zones and top up water as it boils off. Make the tadka in the pan by following its numbered steps. SERVE unlocks once the dal is cooked.'+(S.L.double?' DOUBLE DAL: '+S.L.A.n+' is in the pot. Add '+S.L.B.n+' when COOKED reaches the black mark, so both finish together.':'')+(S.adv?' FULL TADKA: each tap of the spice button adds the next spice and judges the last one, so tap when its meter is in the green.':'');
   if(S.phase==='wash'){
       const isF=S.basin==='full';
       $('b_fill').firstChild.nodeValue=isF?'CHANGE WATER ':'FILL WATER ';
@@ -494,7 +495,7 @@ document.addEventListener('click',e=>{
     else say('Spices added to pan. Manage temperature to bloom.');
     c.spice=true;b.disabled=true;
   }
-  else if(a==='serve'&&S.phase==='cook')return finish();
+  else if(a==='serve'&&dalReady())return finish();
   R();
 });
 
