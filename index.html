@@ -161,7 +161,7 @@ summary{cursor:pointer;font:700 13px ui-monospace,monospace;padding:10px 0;color
     <div class="sl"><label><span id="cl">Burner</span><span id="cdial"></span></label><div class="bn" id="cbn" role="group" aria-label="Pan burner level"></div></div>
     <div class="row"><button data-a="ghee" id="b_ghee">ADD GHEE</button><button data-a="spice" id="b_spice" class="ck">ADD SPICE</button></div>
   </div>
-  <button class="big ck" id="serve" data-a="serve" disabled>SERVE</button>
+  <button class="big" id="serve" data-a="serve">SERVE</button>
   
 </section>
 
@@ -483,7 +483,7 @@ function R(){
   if(S.adv)advUI(c);else sm('cf',c.flav,8,c.flav.toFixed(1));sm('cb',c.burn,10,c.burn>6?'⚠':'');
   $('pdial').textContent=p.dial+' / 10 · '+Math.round(p.temp)+'°';$('cdial').textContent=c.dial+' / 10 · '+Math.round(c.temp)+'°';paintBn('pbn',p.dial);paintBn('cbn',c.dial);
   if(!S.adv){const ds=c.spice?(c.flav>=4?3:2):(c.rich<2?0:1),dr=$('dir');if(dr.dataset.s!==String(ds)){dr.dataset.s=ds;[...dr.children].forEach((l,i)=>l.classList.toggle('now',i===ds))}}
-  $('basp').classList.toggle('off',S.phase!=='wash');{const rd=dalReady(),sv=$('serve'),tx=rd?'SERVE':'SERVE · dal not cooked yet';sv.disabled=!rd;if(sv.dataset.t!==tx){sv.dataset.t=tx;sv.textContent=tx}}
+  $('basp').classList.toggle('off',S.phase!=='wash');{const rd=dalReady(),sv=$('serve'),tx=rd?'SERVE':S.phase==='wash'?'SERVE WASHED DAL (raw)':'SERVE · dal not cooked yet';sv.disabled=false;if(sv.dataset.t!==tx){sv.dataset.t=tx;sv.textContent=tx}}
   // bowl: water colour goes from clear blue to muddy brown; grit specks fade as grit is removed
   const d=S.waterDirt/100,mixc=(a,b)=>Math.round(a+(b-a)*d);
   $('bw').setAttribute('fill',S.basin==='full'?`rgb(${mixc(143,128)},${mixc(211,98)},${mixc(244,58)})`:'#6e6252');
@@ -582,7 +582,7 @@ document.addEventListener('click',e=>{
     else say('Spice added.');
     c.spice=true;b.disabled=true;
   }
-  else if(a==='serve'&&dalReady())return finish();
+  else if(a==='serve')return finish();
   R();
 });
 
